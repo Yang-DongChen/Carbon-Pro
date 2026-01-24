@@ -1,0 +1,86 @@
+/* src/assets/main.css */
+
+/* ==================== 移动端全局适配 (增强版) ==================== */
+@media (max-width: 768px) {
+  /* 1. 全局容器调整 */
+  .content { 
+    padding: 20px 16px !important; 
+    padding-bottom: 90px !important; /* 避开底部导航 */
+    width: 100% !important;
+    box-sizing: border-box;
+    overflow-x: hidden; /* 防止左右晃动 */
+  }
+
+  /* 2. 强制所有 Grid 布局变单列 */
+  .dashboard, .split-layout, .unified-grid, .shop-grid, .badges-grid, .wiki-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  /* --- 首页 (Overview) 修复 --- */
+  .hero {
+    height: 320px !important; /* 轮播图高度适中 */
+    margin-bottom: 24px !important;
+    flex-direction: column-reverse; /* 文字在下，图在上 */
+    gap: 20px !important;
+  }
+  .hero-text { 
+    max-width: 100% !important; 
+    text-align: center; 
+    padding: 0 10px;
+  }
+  .title { font-size: 32px !important; margin-bottom: 10px !important; }
+  .subtitle { font-size: 15px !important; margin-bottom: 20px !important; }
+  .cta-btn { margin: 0 auto; width: 100%; justify-content: center; }
+
+  /* ★★★ 核心修复：首页大卡片变竖排 ★★★ */
+  .white-card {
+    flex-direction: column !important; /* 上下排列 */
+    align-items: flex-start !important;
+    height: auto !important; /* 高度自适应 */
+    padding: 24px !important;
+  }
+  .stat-info {
+    width: 100% !important;
+    flex: none !important;
+    margin-bottom: 20px;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .value-group { margin: 5px 0 !important; }
+  .chart-container {
+    width: 100% !important;
+    height: 220px !important; /* 给图表固定高度 */
+  }
+
+  /* --- 百科 (Wiki) 修复 --- */
+  .wiki-search-box {
+    flex-direction: column; /* 搜索框变竖排 */
+    gap: 10px;
+  }
+  .wiki-input {
+    width: 100% !important;
+  }
+  /* 百科卡片适配 */
+  .wiki-card {
+    flex-direction: column !important; /* 图片在上，文在下 */
+    height: auto !important;
+  }
+  .wiki-img-box {
+    width: 100% !important;
+    height: 180px !important;
+  }
+  .wiki-content {
+    width: 100% !important;
+    padding: 20px !important;
+  }
+  
+  /* --- 其他通用 --- */
+  .desktop-only { display: none !important; }
+  .mobile-only { display: flex !important; }
+  .el-message-box { width: 90% !important; max-width: 360px; }
+  .el-dialog { width: 90% !important; }
+}
