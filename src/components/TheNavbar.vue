@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter, useRoute } from 'vue-router' // 引入 useRoute 用于底部导航高亮
+import { useRouter, useRoute } from 'vue-router' 
 import { useUserStore } from '../stores/user'
 import { 
   CaretBottom, Camera, Edit, Key, SwitchButton, UploadFilled,
