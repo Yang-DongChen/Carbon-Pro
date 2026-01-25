@@ -46,8 +46,9 @@ const handleLogin = () => {
            <path d="M12.0002 21.5C12.0002 21.5 12.0002 14.5 9.50024 11C7.00024 7.5 3.50024 7 3.50024 7C3.50024 7 6.00024 2 12.0002 2C18.0002 2 20.5002 7 20.5002 7C20.5002 7 17.0002 7.5 14.5002 11C12.0002 14.5 12.0002 21.5 12.0002 21.5Z" stroke="#1d1d1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
            <path d="M12 21.5V13" stroke="#1d1d1f" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <h2>Sign In</h2>
-        <p class="subtitle">登录 Carbon Monitor Pro</p>
+        
+        <h2>Terra ID</h2>
+        <p class="subtitle">登录您的低碳生活</p>
       </div>
 
       <div class="form-area">

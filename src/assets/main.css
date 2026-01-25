@@ -1,44 +1,113 @@
 /* src/assets/main.css */
 
-/* ==================== 移动端全局适配 (增强版) ==================== */
+/* ==================== 移动端全局适配 (终极版) ==================== */
 @media (max-width: 768px) {
   /* 1. 全局容器调整 */
   .content { 
     padding: 20px 16px !important; 
-    padding-bottom: 90px !important; /* 避开底部导航 */
+    padding-bottom: 90px !important;
     width: 100% !important;
     box-sizing: border-box;
-    overflow-x: hidden; /* 防止左右晃动 */
+    overflow-x: hidden;
   }
 
-  /* 2. 强制所有 Grid 布局变单列 */
-  .dashboard, .split-layout, .unified-grid, .shop-grid, .badges-grid, .wiki-grid {
+  /* 2. 强制页面大框架变单列 */
+  /* ★★★ 注意：这里删除了 .badges-grid，因为它需要保持网格状 ★★★ */
+  .dashboard, .split-layout, .unified-grid, .shop-grid, .wiki-grid {
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
-  }
-
-  /* --- 首页 (Overview) 修复 --- */
-  .hero {
-    height: 320px !important; /* 轮播图高度适中 */
-    margin-bottom: 24px !important;
-    flex-direction: column-reverse; /* 文字在下，图在上 */
     gap: 20px !important;
   }
+
+  /* 3. ★★★ 专门修复：荣誉墙勋章 (Badges) ★★★ */
+  .badges-grid {
+    display: grid !important;
+    /* 手机上强制显示 3 列，自动适应宽度 */
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 15px !important;
+    width: 100% !important;
+  }
+  
+  /* 调整勋章小卡片的样式，让它更紧凑 */
+  .badge-item {
+    width: auto !important;
+    aspect-ratio: 1/1.2; /* 保持漂亮的比例 */
+  }
+  .badge-icon {
+    width: 56px !important; /* 稍微缩小图标底座 */
+    height: 56px !important;
+    font-size: 28px !important;
+  }
+  .badge-name {
+    font-size: 11px !important;
+    margin-top: 4px;
+  }
+
+  /* 4. 积分商城 (Shop) 列表微调 */
+  .shop-item {
+    padding: 16px !important; /* 增加手指点击区域 */
+  }
+  .item-text p {
+    max-width: 180px !important; /* 防止文字过长撑坏布局 */
+  }
+
+  /* 5. 首页 Hero 修复 */
+  .hero {
+    height: auto !important;
+    min-height: 500px; 
+    margin-bottom: 30px !important;
+    flex-direction: column-reverse !important; 
+    gap: 0 !important;
+  }
+
+  .hero-image-box {
+    width: 100% !important;
+    height: 280px !important;
+    flex: none !important;
+    border-radius: 24px !important; 
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+  }
+  /* 让所有背景类图片更有质感 */
+.hero-img-slider, 
+.wiki-img-box img, 
+.cover-image {
+  /* 1. 稍微降低一点亮度，让白色文字更清晰 */
+  filter: brightness(0.9) contrast(1.1); 
+  
+  /* 2. 确保图片填满且不变形 */
+  object-fit: cover;
+}
+
+/* 针对 Hero 大图，可以加一个不易察觉的渐变遮罩，模拟“影棚光” */
+.hero-image-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* 从左下角黑到右上角透明，增加层次感 */
+  background: linear-gradient(to top right, rgba(0,0,0,0.2), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+  .hero-swiper { height: 100% !important; width: 100% !important; }
+  
   .hero-text { 
     max-width: 100% !important; 
     text-align: center; 
-    padding: 0 10px;
+    padding: 10px 20px;
+    z-index: 2;
   }
-  .title { font-size: 32px !important; margin-bottom: 10px !important; }
-  .subtitle { font-size: 15px !important; margin-bottom: 20px !important; }
+
+  .title { font-size: 32px !important; margin-bottom: 12px !important; }
+  .subtitle { font-size: 15px !important; margin-bottom: 24px !important; }
   .cta-btn { margin: 0 auto; width: 100%; justify-content: center; }
 
-  /* ★★★ 核心修复：首页大卡片变竖排 ★★★ */
+  /* 6. 首页大卡片变竖排 */
   .white-card {
-    flex-direction: column !important; /* 上下排列 */
+    flex-direction: column !important;
     align-items: flex-start !important;
-    height: auto !important; /* 高度自适应 */
+    height: auto !important;
     padding: 24px !important;
   }
   .stat-info {
@@ -51,36 +120,22 @@
     justify-content: space-between;
   }
   .value-group { margin: 5px 0 !important; }
-  .chart-container {
-    width: 100% !important;
-    height: 220px !important; /* 给图表固定高度 */
-  }
+  .chart-container { width: 100% !important; height: 220px !important; }
 
-  /* --- 百科 (Wiki) 修复 --- */
-  .wiki-search-box {
-    flex-direction: column; /* 搜索框变竖排 */
-    gap: 10px;
-  }
-  .wiki-input {
-    width: 100% !important;
-  }
-  /* 百科卡片适配 */
+  /* 7. 百科 (Wiki) 修复 */
+  .wiki-search-box { flex-direction: column; gap: 10px; }
+  .wiki-input { width: 100% !important; }
   .wiki-card {
-    flex-direction: column !important; /* 图片在上，文在下 */
+    flex-direction: column !important;
     height: auto !important;
   }
-  .wiki-img-box {
-    width: 100% !important;
-    height: 180px !important;
-  }
-  .wiki-content {
-    width: 100% !important;
-    padding: 20px !important;
-  }
+  .wiki-img-box { width: 100% !important; height: 180px !important; }
+  .wiki-content { width: 100% !important; padding: 20px !important; }
   
-  /* --- 其他通用 --- */
+  /* 通用 */
   .desktop-only { display: none !important; }
   .mobile-only { display: flex !important; }
   .el-message-box { width: 90% !important; max-width: 360px; }
   .el-dialog { width: 90% !important; }
+  .level-card { padding: 24px !important; height: auto !important; }
 }

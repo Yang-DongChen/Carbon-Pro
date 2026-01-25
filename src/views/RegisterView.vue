@@ -45,9 +45,10 @@ const handleRegister = () => {
   <div class="register-container">
     <div class="register-card fade-up">
       <div class="logo-area">
-        <el-icon class="logo-icon" color="#0071e3" :size="40"><Collection /></el-icon>
-        <h2>创建 Carbon ID</h2>
-        <p class="subtitle">开始你的低碳之旅</p>
+        <el-icon class="logo-icon" color="#1d1d1f" :size="40"><Collection /></el-icon>
+        
+        <h2>创建 Terra ID</h2>
+        <p class="subtitle">开启一段新的旅程</p>
       </div>
 
       <div class="form-area">
