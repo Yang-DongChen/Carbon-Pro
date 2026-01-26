@@ -22,16 +22,25 @@ const handleLogin = () => {
 
   loading.value = true
 
-  // 模拟网络延迟，增加真实感
+  // 模拟网络延迟
   setTimeout(() => {
-    // 调用 Store 的登录方法
-    const success = store.login(form)
+    // ★★★ 核心修改：接收返回的对象
+    const result = store.login(form)
     
-    if (success) {
-      ElMessage.success('欢迎回来，' + store.userInfo.name)
-      router.push('/') // 跳转到首页
+    if (result.success) {
+      // 1. 如果是管理员，跳转到后台
+      if (result.role === 'admin') {
+        ElMessage.success('管理员登录成功')
+        router.push('/admin') 
+      } 
+      // 2. 如果是普通用户，跳转到首页
+      else {
+        ElMessage.success('欢迎回来，' + store.userInfo.name)
+        router.push('/') 
+      }
     } else {
-      ElMessage.error('密码错误 (默认密码是 123)')
+      // 3. 登录失败（可能是密码错误，或者维护中）
+      ElMessage.error(result.msg) // 显示具体错误信息
       loading.value = false
     }
   }, 800)
@@ -84,20 +93,20 @@ const handleLogin = () => {
       <div class="footer-links">
         <span>还没有账号? <router-link to="/register">立即注册</router-link></span>
         <span class="divider">|</span>
-        <span class="tip">默认密码: 123</span>
+        <span class="tip">管理员: admin@terra.com / admin123</span>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* 保持原有 style 内容不变... */
 .login-container {
   min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
   background: #f5f5f7;
   padding: 20px;
 }
-
 .login-card {
   background: white;
   width: 100%; max-width: 400px;
@@ -106,15 +115,11 @@ const handleLogin = () => {
   box-shadow: 0 20px 40px rgba(0,0,0,0.05);
   text-align: center;
 }
-
 .logo-area { margin-bottom: 40px; }
 .leaf-logo { margin-bottom: 10px; color: #1d1d1f; }
 h2 { font-size: 28px; font-weight: 700; margin: 0 0 8px; color: #1d1d1f; }
 .subtitle { color: #86868b; font-size: 14px; margin: 0; }
-
 .form-area { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
-
-/* 深度定制 Element Input */
 :global(.custom-input .el-input__wrapper) {
   border-radius: 16px;
   padding: 8px 15px;
@@ -126,7 +131,6 @@ h2 { font-size: 28px; font-weight: 700; margin: 0 0 8px; color: #1d1d1f; }
   box-shadow: 0 0 0 2px #0071e3 inset !important;
   background: white;
 }
-
 .login-btn {
   background: #1d1d1f; color: white; border: none;
   height: 50px; border-radius: 25px;
@@ -136,20 +140,16 @@ h2 { font-size: 28px; font-weight: 700; margin: 0 0 8px; color: #1d1d1f; }
 }
 .login-btn:hover { background: #000; transform: scale(1.02); }
 .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
 .footer-links { font-size: 13px; color: #86868b; }
 .footer-links a { color: #0071e3; text-decoration: none; font-weight: 500; }
 .divider { margin: 0 10px; color: #ddd; }
 .tip { color: #999; }
-
-/* 简单的 Loading 圈 */
 .loader {
   width: 18px; height: 18px; border: 2px solid #fff;
   border-bottom-color: transparent; border-radius: 50%;
   animation: rotate 1s linear infinite;
 }
 @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
 .fade-up { animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>

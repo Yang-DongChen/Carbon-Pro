@@ -2,15 +2,17 @@
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router' 
 import { useUserStore } from '../stores/user'
+import { useCarbonStore } from '../stores/carbon' // ★★★ 新增引入：用于退出时清空数据
 import { 
   CaretBottom, Camera, Edit, Key, SwitchButton, UploadFilled,
-  HomeFilled, DataAnalysis, Clock, Medal, Reading // 引入底部导航图标
+  HomeFilled, DataAnalysis, Clock, Medal, Reading
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
-const route = useRoute() // 获取当前路由
+const route = useRoute()
 const userStore = useUserStore()
+const carbonStore = useCarbonStore() // ★★★ 初始化 Carbon Store
 
 // --- 弹窗控制状态 ---
 const showAvatarDialog = ref(false)
@@ -39,11 +41,27 @@ const handleCommand = (command) => {
   }
 }
 
-// 业务逻辑保持不变 (退出、头像、信息、密码)
+// 业务逻辑：退出登录 (★★★ 修复核心：退出时清空所有状态)
 const handleLogout = () => {
   ElMessageBox.confirm('确定要退出登录吗？', '提示', { confirmButtonText: '退出', cancelButtonText: '取消', type: 'warning' })
-    .then(() => { userStore.logout(); router.push('/login'); ElMessage.success('已安全退出'); })
+    .then(() => { 
+      // 1. 清除用户登录状态
+      userStore.logout(); 
+      
+      // 2. ★★★ 强制清空碳排放数据 (解决新用户继承旧数据的 Bug)
+      // 如果您的 store 提供了 $reset() 方法，建议使用 carbonStore.$reset()
+      // 这里手动清空以确保万无一失：
+      carbonStore.records = []; 
+      carbonStore.totalCo2Saved = 0;
+      // 如果还有其他状态需要重置，请在这里添加
+      
+      // 3. 跳转登录页
+      router.push('/login'); 
+      ElMessage.success('已安全退出'); 
+    })
 }
+
+// 头像与个人信息保存逻辑保持不变
 const handleFileChange = (e) => {
   const file = e.target.files[0]; if (!file) return;
   if (file.size > 2 * 1024 * 1024) return ElMessage.warning('图片大小不能超过 2MB');
@@ -56,7 +74,7 @@ const savePassword = () => {
   if (!passwordForm.oldPass || !passwordForm.newPass) return ElMessage.warning('请填写完整');
   if (passwordForm.newPass !== passwordForm.confirmPass) return ElMessage.error('两次输入的新密码不一致');
   if (userStore.changePassword(passwordForm.oldPass, passwordForm.newPass)) {
-    showPasswordDialog.value = false; ElMessage.success('密码修改成功，请重新登录'); userStore.logout(); router.push('/login');
+    showPasswordDialog.value = false; ElMessage.success('密码修改成功，请重新登录'); handleLogout(); // 修改密码后强制退出
   } else { ElMessage.error('旧密码错误'); }
 }
 const triggerFileInput = () => { document.getElementById('hidden-file-input').click() }
@@ -67,14 +85,14 @@ const triggerFileInput = () => { document.getElementById('hidden-file-input').cl
     <nav class="apple-nav">
       <div class="nav-content">
         <div class="nav-left">
-        <div class="logo-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.0002 21.5C12.0002 21.5 12.0002 14.5 9.50024 11C7.00024 7.5 3.50024 7 3.50024 7C3.50024 7 6.00024 2 12.0002 2C18.0002 2 20.5002 7 20.5002 7C20.5002 7 17.0002 7.5 14.5002 11C12.0002 14.5 12.0002 21.5 12.0002 21.5Z" stroke="#1d1d1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 21.5V13" stroke="#1d1d1f" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.0002 21.5C12.0002 21.5 12.0002 14.5 9.50024 11C7.00024 7.5 3.50024 7 3.50024 7C3.50024 7 6.00024 2 12.0002 2C18.0002 2 20.5002 7 20.5002 7C20.5002 7 17.0002 7.5 14.5002 11C12.0002 14.5 12.0002 21.5 12.0002 21.5Z" stroke="#1d1d1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 21.5V13" stroke="#1d1d1f" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="brand-name">Terra</span>
         </div>
-        <span class="brand-name">Terra</span>
-      </div>
         
         <div class="nav-links desktop-only">
           <router-link to="/" class="nav-item" active-class="active">概览</router-link>
@@ -89,7 +107,7 @@ const triggerFileInput = () => { document.getElementById('hidden-file-input').cl
             <div class="user-dropdown-trigger">
               <div class="avatar-circle">
                 <img v-if="userStore.userInfo.avatar" :src="userStore.userInfo.avatar" class="avatar-img" />
-                <span v-else>{{ userStore.userInfo.name.charAt(0).toUpperCase() }}</span>
+                <span v-else>{{ userStore.userInfo.name ? userStore.userInfo.name.charAt(0).toUpperCase() : 'U' }}</span>
               </div>
               <span class="username desktop-only">{{ userStore.userInfo.name }}</span>
               <el-icon class="dropdown-arrow desktop-only"><CaretBottom /></el-icon>
@@ -156,7 +174,7 @@ const triggerFileInput = () => { document.getElementById('hidden-file-input').cl
 </template>
 
 <style scoped>
-/* 基础导航栏 */
+/* 基础导航栏样式保持不变，确保美观 */
 .apple-nav {
   position: fixed; top: 0; left: 0; width: 100%; height: 52px;
   background: rgba(255, 255, 255, 0.85); backdrop-filter: saturate(180%) blur(20px);
@@ -166,44 +184,29 @@ const triggerFileInput = () => { document.getElementById('hidden-file-input').cl
 .nav-left { display: flex; align-items: center; gap: 8px; }
 .brand-name { font-weight: 600; font-size: 15px; color: #1d1d1f; }
 .logo-icon { width: 24px; height: 24px; }
-
-/* 链接样式 */
 .nav-links { display: flex; gap: 32px; }
 .nav-item { font-size: 13px; color: #6e6e73; text-decoration: none; transition: 0.2s; position: relative; }
 .nav-item.active { color: #1d1d1f; font-weight: 500; }
-
-/* 用户区 */
 .nav-right { display: flex; align-items: center; }
-.user-dropdown-trigger { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.avatar-circle { width: 28px; height: 28px; border-radius: 50%; background: #1d1d1f; color: white; display: flex; justify-content: center; align-items: center; font-size: 12px; overflow: hidden; }
+.user-dropdown-trigger { display: flex; align-items: center; gap: 8px; cursor: pointer; outline: none; }
+.avatar-circle { width: 28px; height: 28px; border-radius: 50%; background: #1d1d1f; color: white; display: flex; justify-content: center; align-items: center; font-size: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1); }
 .avatar-img { width: 100%; height: 100%; object-fit: cover; }
-.username { font-size: 13px; font-weight: 500; }
+.username { font-size: 13px; font-weight: 500; color: #1d1d1f; }
+.dropdown-arrow { font-size: 12px; color: #86868b; }
 
-/* --- 响应式核心逻辑 --- */
-
-/* 默认隐藏手机版 Tab Bar */
+/* 手机适配 */
 .mobile-only { display: none; }
-
-/* 手机屏幕适配 (宽度小于 768px) */
 @media (max-width: 768px) {
-  /* 1. 隐藏电脑版元素 */
   .desktop-only { display: none !important; }
-  
-  /* 2. 显示手机版 Tab Bar */
   .mobile-only { display: flex !important; }
-
-  /* 3. 调整顶部导航栏 */
   .nav-content { padding: 0 16px; }
-  
-  /* 4. 底部导航栏样式 */
   .mobile-tab-bar {
-    position: fixed; bottom: 0; left: 0; width: 100%; height: 50px; /* 增加底部安全区 */
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 50px;
     background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
     border-top: 1px solid rgba(0,0,0,0.1);
     display: flex; justify-content: space-around; align-items: center;
     z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
   }
-
   .tab-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     color: #999; text-decoration: none; font-size: 10px; gap: 2px; flex: 1; height: 100%;
@@ -213,8 +216,16 @@ const triggerFileInput = () => { document.getElementById('hidden-file-input').cl
 }
 
 /* 弹窗样式 */
-.avatar-uploader { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ccc; margin: 20px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.avatar-uploader { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ccc; margin: 20px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; transition: 0.2s; }
+.avatar-uploader:hover { border-color: #0071e3; background: #f5f9ff; }
 .preview-img { width: 100%; height: 100%; object-fit: cover; }
+.upload-placeholder { display: flex; flex-direction: column; align-items: center; color: #86868b; font-size: 12px; }
+.upload-icon { font-size: 24px; margin-bottom: 4px; }
 .form-group { display: flex; flex-direction: column; gap: 15px; padding: 10px 0; }
+.form-item label { display: block; margin-bottom: 6px; font-size: 13px; color: #666; }
 :global(.custom-dialog) { border-radius: 20px !important; max-width: 400px; }
+:global(.custom-dropdown .el-dropdown-menu__item) { padding: 10px 20px; font-size: 13px; }
+:global(.custom-dropdown .el-dropdown-menu__item:hover) { background-color: #f5f5f7; color: #1d1d1f; }
+:global(.danger-item) { color: #ff3b30 !important; }
+:global(.danger-item:hover) { background-color: #fff1f0 !important; }
 </style>
