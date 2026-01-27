@@ -3,7 +3,7 @@ import { ref, reactive } from 'vue'
 import { useCarbonStore } from './carbon'
 
 export const useUserStore = defineStore('user', () => {
-  // --- 初始化数据 ---
+  // 1. 初始化数据 (从本地读取用户信息)
   const storedData = JSON.parse(localStorage.getItem('carbon_user_data')) || {
     name: '低碳达人',
     avatar: '', 
@@ -13,15 +13,25 @@ export const useUserStore = defineStore('user', () => {
 
   const userInfo = ref(storedData)
   const isLoggedIn = ref(!!localStorage.getItem('carbon_is_logged_in'))
+
+  // 全局维护状态
   const isMaintenance = ref(false)
 
-  // 用户列表 (用于管理员后台)
+  // 用户列表 (管理员用) - 优先从本地读取，确保持久化
   const defaultUserList = [
     { id: 101, name: 'Jason', email: 'jason@terra.com', role: 'user', status: 'normal' },
     { id: 102, name: 'Amy', email: 'amy@terra.com', role: 'user', status: 'banned' },
   ]
   const storedList = JSON.parse(localStorage.getItem('carbon_user_list')) || defaultUserList
   const userList = reactive(storedList)
+
+  // 自动加载 Carbon 数据 (防止刷新丢失)
+  if (isLoggedIn.value && userInfo.value.email) {
+    setTimeout(() => {
+      const carbonStore = useCarbonStore()
+      carbonStore.loadUserData(userInfo.value.email)
+    }, 0)
+  }
 
   const saveState = () => {
     localStorage.setItem('carbon_user_data', JSON.stringify(userInfo.value))
@@ -34,47 +44,53 @@ export const useUserStore = defineStore('user', () => {
     const inputEmail = (form.email || '').trim()
     const inputPwd = (form.password || '').trim()
 
-    // 维护模式检查
+    // 1. 维护模式检查
     if (isMaintenance.value && inputEmail !== 'admin@terra.com') {
       return { success: false, msg: '🚧 系统正在停服维护中，请稍后访问。' }
     }
 
-    // 管理员登录
+    // 2. 管理员登录 (硬编码)
     if (inputEmail === 'admin@terra.com' && inputPwd === 'admin123') {
       userInfo.value = { name: '超级管理员', avatar: '', role: 'admin', email: 'admin@terra.com', password: 'admin123' }
       isLoggedIn.value = true
       localStorage.setItem('carbon_is_logged_in', 'true')
       
-      // ★★★ 修复点：管理员也可以有一套空的数据，或者不加载
       const carbonStore = useCarbonStore()
       carbonStore.loadUserData('admin@terra.com')
       
       return { success: true, role: 'admin' }
     }
 
-    // 普通用户验证
-    // 这里简单演示：只要密码不是 123 (默认) 且不是当前缓存密码就报错
-    // (注意：真实项目这里应该遍历 userList 校验密码，目前为了简便，只校验当前 session 或默认密码)
-    const storedUserInList = userList.find(u => u.email === inputEmail)
-    // 如果是列表里的用户，这里默认密码假设都是 123 或者之前保存的
-    // 为了不破坏您现有的逻辑，这里保留简单校验：
-    if (inputPwd !== '123' && inputPwd !== userInfo.value.password) {
-       return { success: false, msg: '密码错误 (默认密码 123)' }
+    // 3. 普通用户登录验证
+    const existingUser = userList.find(u => u.email === inputEmail)
+
+    // 检查封禁状态
+    if (existingUser && existingUser.status === 'banned') {
+      return { success: false, msg: '该账号已被封禁' }
+    }
+
+    // 密码校验：只允许正确密码 (移除了 123 后门)
+    if (inputPwd !== userInfo.value.password) {
+       return { success: false, msg: '密码错误' }
     }
     
-    // 登录成功逻辑
-    // 更新 userInfo
-    if (userInfo.value.name === '低碳达人' && inputEmail) {
+    // 登录成功：同步用户信息
+    if (existingUser) {
+      // 如果是老用户，加载他的名字和角色
+      userInfo.value.name = existingUser.name
+      userInfo.value.role = existingUser.role
+    } else {
+      // 如果是新设备登录/新数据，使用默认名字
       userInfo.value.name = inputEmail.split('@')[0]
+      userInfo.value.role = 'user'
     }
-    userInfo.value.email = inputEmail // 确保记录了邮箱
-    userInfo.value.role = 'user'
     
+    userInfo.value.email = inputEmail
     isLoggedIn.value = true
     localStorage.setItem('carbon_is_logged_in', 'true')
     saveState()
 
-    // ★★★ 核心修复：登录成功后，立刻加载这个用户的数据！
+    // 加载该用户的 Carbon 数据
     const carbonStore = useCarbonStore()
     carbonStore.loadUserData(inputEmail)
 
@@ -86,14 +102,14 @@ export const useUserStore = defineStore('user', () => {
 
     const inputEmail = form.email.trim()
     
-    // 更新当前用户状态
+    // 更新当前登录态
     userInfo.value.name = inputEmail.split('@')[0] || '新用户'
     userInfo.value.email = inputEmail
     userInfo.value.password = form.password
     userInfo.value.avatar = ''
     userInfo.value.role = 'user'
 
-    // 添加到管理员列表
+    // 添加到用户列表 (如果不存在)
     const exists = userList.find(u => u.email === inputEmail)
     if (!exists) {
       userList.push({
@@ -103,13 +119,16 @@ export const useUserStore = defineStore('user', () => {
         role: 'user',
         status: 'normal'
       })
+    } else {
+      // 如果已存在，更新列表里的名字
+      exists.name = userInfo.value.name
     }
 
     isLoggedIn.value = true
     localStorage.setItem('carbon_is_logged_in', 'true')
     saveState()
 
-    // ★★★ 核心修复：注册成功后，初始化该用户的数据 (加载会是空的，但 key 已经建立了)
+    // 初始化数据
     const carbonStore = useCarbonStore()
     carbonStore.loadUserData(inputEmail)
     
@@ -121,7 +140,7 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value.role = 'user'
     localStorage.removeItem('carbon_is_logged_in')
     
-    // ★★★ 核心修复：退出时，只清理内存，不删文件
+    // 清除 Carbon Store 的会话数据 (但不删本地文件)
     const carbonStore = useCarbonStore()
     carbonStore.clearSession()
   }
@@ -129,8 +148,11 @@ export const useUserStore = defineStore('user', () => {
   function updateProfile(data) {
     if (data.name) userInfo.value.name = data.name
     if (data.avatar) userInfo.value.avatar = data.avatar
+    
+    // 同步更新用户列表里的数据
     const currentUserInList = userList.find(u => u.email === userInfo.value.email)
     if (currentUserInList && data.name) currentUserInList.name = data.name
+    
     saveState()
   }
 

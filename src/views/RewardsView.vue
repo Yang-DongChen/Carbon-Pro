@@ -2,28 +2,90 @@
 import { ref } from 'vue'
 import TheNavbar from '../components/TheNavbar.vue'
 import { useCarbonStore } from '../stores/carbon'
-import { Lock, VideoPlay, Headset, Present, Goods, Medal, ShoppingBag, ArrowRight } from '@element-plus/icons-vue'
+/* 引入新图标：Van(公交), Bicycle(单车), Ticket(地铁/票), Goods, Trophy, ShoppingBag, Lock */
+import { 
+  Trophy, ShoppingBag, Lock, ArrowRight,
+  Van, Bicycle, Ticket, Goods, Present
+} from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const store = useCarbonStore()
+const activeTab = ref('badges') // 'badges' | 'shop'
 
+// ★★★ 核心修改：商品列表更新为“绿色出行”主题 ★★★
 const products = [
-  { id: 1, name: 'YouTube Premium', desc: '1个月免广告权益', cost: 5000, icon: VideoPlay, color: '#FF0000' },
-  { id: 2, name: 'Spotify 会员', desc: '30天无限畅听', cost: 3000, icon: Headset, color: '#1DB954' },
-  { id: 3, name: '星巴克中杯券', desc: '电子兑换码', cost: 1500, icon: Present, color: '#00704A' },
-  { id: 4, name: 'Bilibili 大会员', desc: '30天大会员权益', cost: 4500, icon: VideoPlay, color: '#FB7299' },
-  { id: 5, name: '环保帆布袋', desc: 'Carbon ID 限定周边', cost: 2000, icon: Goods, color: '#8e8e93' },
-  { id: 6, name: '树苗捐赠', desc: '以你之名种下一棵树', cost: 8000, icon: '🌲', color: '#34c759' },
+  { 
+    id: 1, 
+    name: '公交乘车券', 
+    desc: '市内公交免费乘坐一次', 
+    cost: 300, 
+    icon: Van, 
+    color: '#34c759' // 绿色
+  },
+  { 
+    id: 2, 
+    name: '共享单车周卡', 
+    desc: '7天无限次免费骑行', 
+    cost: 1200, 
+    icon: Bicycle, 
+    color: '#0071e3' // 蓝色
+  },
+  { 
+    id: 3, 
+    name: '地铁单程票', 
+    desc: '轨道交通通用电子票', 
+    cost: 500, 
+    icon: Ticket, 
+    color: '#5e5ce6' // 紫色
+  },
+  { 
+    id: 4, 
+    name: '环保帆布袋', 
+    desc: 'Carbon ID 限量周边', 
+    cost: 2000, 
+    icon: Goods, 
+    color: '#8e8e93' // 灰色
+  },
+  { 
+    id: 5, 
+    name: '树苗捐赠', 
+    desc: '以你之名种下一棵树', 
+    cost: 8000, 
+    icon: '🌲', // 使用 Emoji 增加趣味性
+    color: '#27ae60' // 深绿
+  },
+  { 
+    id: 6, 
+    name: '星巴克中杯券', 
+    desc: '自带杯免费升杯', 
+    cost: 1500, 
+    icon: Present, 
+    color: '#00704A' // 星巴克绿
+  }
 ]
 
 const handleRedeem = (item) => {
   if (store.points < item.cost) return ElMessage.error('积分不足')
-  ElMessageBox.confirm(`确认消耗 ${item.cost} 积分兑换 ${item.name}？`, '兑换确认', { confirmButtonText: '兑换', cancelButtonText: '取消' })
-    .then(() => {
-      if (store.redeem(item.cost)) {
-        ElMessageBox.alert(`兑换码：CBN-${Math.random().toString(36).substr(2, 8).toUpperCase()}\n请截图保存。`, '兑换成功 🎉', { center: true })
-      }
-    }).catch(() => {})
+  
+  ElMessageBox.confirm(
+    `确认消耗 ${item.cost} 积分兑换 ${item.name}？`, 
+    '兑换确认', 
+    { confirmButtonText: '确认兑换', cancelButtonText: '再想想' }
+  ).then(() => {
+    if (store.redeem(item.cost)) {
+      // 模拟生成一个核销码
+      const code = `ECO-${Math.floor(Math.random() * 1000000)}`
+      ElMessageBox.alert(
+        `<div style="text-align: center;">
+           <p style="font-size: 16px; margin-bottom: 10px;">兑换成功！🎉</p>
+           <div style="background: #f5f5f7; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 20px; font-weight: bold; color: #0071e3; letter-spacing: 2px;">${code}</div>
+           <p style="font-size: 12px; color: #86868b; margin-top: 10px;">请截图保存，在对应APP使用</p>
+         </div>`, 
+        '兑换凭证', 
+        { dangerouslyUseHTMLString: true, center: true }
+      )
+    }
+  }).catch(() => {})
 }
 
 const showBadgeDetail = (badge) => {
@@ -58,158 +120,165 @@ const showBadgeDetail = (badge) => {
         </div>
       </section>
 
-      <div class="split-layout fade-up delay-1">
+      <div class="tabs-control fade-up delay-1">
+        <div class="tab-slider" :class="{ right: activeTab === 'shop' }"></div>
         
-        <section class="panel badges-panel">
-          <div class="panel-header">
-            <h3><el-icon><Medal /></el-icon> 荣誉墙</h3>
-          </div>
-          <div class="badges-grid">
-            <div 
-              v-for="badge in store.badges" 
-              :key="badge.id" 
-              class="badge-item"
-              :class="{ locked: !badge.unlocked }"
-              @click="showBadgeDetail(badge)"
-            >
-              <div class="badge-icon">
-                {{ badge.icon }}
-                <div class="lock-mask" v-if="!badge.unlocked"><el-icon><Lock /></el-icon></div>
-              </div>
-              <span class="badge-name">{{ badge.title }}</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel shop-panel">
-          <div class="panel-header">
-            <h3><el-icon><ShoppingBag /></el-icon> 兑换中心</h3>
-            <span class="more-link">查看全部 <el-icon><ArrowRight /></el-icon></span>
-          </div>
-          <div class="shop-list">
-            <div v-for="item in products" :key="item.id" class="shop-item">
-              <div class="item-left">
-                <div class="item-icon" :style="{ background: item.color }">
-                  <span v-if="typeof item.icon === 'string'">{{ item.icon }}</span>
-                  <el-icon v-else><component :is="item.icon" /></el-icon>
-                </div>
-                <div class="item-text">
-                  <h4>{{ item.name }}</h4>
-                  <p>{{ item.desc }}</p>
-                </div>
-              </div>
-              <button 
-                class="redeem-btn" 
-                :class="{ disabled: store.points < item.cost }"
-                @click="handleRedeem(item)"
-              >
-                {{ item.cost }}
-              </button>
-            </div>
-          </div>
-        </section>
-
+        <div class="tab-item" :class="{ active: activeTab === 'badges' }" @click="activeTab = 'badges'">
+          <el-icon><Trophy /></el-icon> 成就勋章
+        </div>
+        <div class="tab-item" :class="{ active: activeTab === 'shop' }" @click="activeTab = 'shop'">
+          <el-icon><ShoppingBag /></el-icon> 积分商城
+        </div>
       </div>
 
+      <div class="tab-content fade-up delay-2">
+        
+        <div v-if="activeTab === 'badges'" class="badges-grid">
+          <div 
+            v-for="badge in store.badges" 
+            :key="badge.id" 
+            class="badge-item"
+            :class="{ locked: !badge.unlocked }"
+            @click="showBadgeDetail(badge)"
+          >
+            <div class="badge-icon-wrapper">
+              <span class="emoji-icon">{{ badge.icon }}</span>
+              <div class="lock-overlay" v-if="!badge.unlocked"><el-icon><Lock /></el-icon></div>
+            </div>
+            <h3 class="badge-title">{{ badge.title }}</h3>
+            <p class="badge-status">{{ badge.unlocked ? '已解锁' : '未解锁' }}</p>
+          </div>
+        </div>
+
+        <div v-if="activeTab === 'shop'" class="shop-grid">
+          <div v-for="item in products" :key="item.id" class="product-card">
+            <div class="product-icon" :style="{ background: item.color }">
+              <span v-if="typeof item.icon === 'string'" style="font-size: 24px;">{{ item.icon }}</span>
+              <el-icon v-else><component :is="item.icon" /></el-icon>
+            </div>
+            
+            <div class="product-info">
+              <h3>{{ item.name }}</h3>
+              <p>{{ item.desc }}</p>
+            </div>
+            
+            <button 
+              class="price-btn" 
+              :class="{ disabled: store.points < item.cost }"
+              @click="handleRedeem(item)"
+            >
+              {{ item.cost }}
+            </button>
+          </div>
+        </div>
+
+      </div>
     </main>
   </div>
 </template>
 
 <style scoped>
-.rewards-page { min-height: 100vh; padding-top: 52px; background: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
-.content { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+.rewards-page { min-height: 100vh; padding-top: 52px; background: #f5f5f7; }
+.content { max-width: 800px; margin: 0 auto; padding: 30px 20px; }
 
-/* --- 1. Hero Card --- */
-.hero-section { margin-bottom: 24px; }
+/* 1. Level Card (强制黑金风格) */
 .level-card {
-  background: #1d1d1f; color: white; border-radius: 24px; padding: 40px;
-  position: relative; overflow: hidden; display: flex; align-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15); height: 180px; box-sizing: border-box;
+  background: linear-gradient(135deg, #1d1d1f 0%, #3a3a3c 100%) !important;
+  color: white !important;
+  border-radius: 24px; padding: 40px; margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+  position: relative; overflow: hidden; border: none !important;
 }
-.card-bg-glow {
-  position: absolute; top: -50%; right: -10%; width: 400px; height: 400px;
+.level-card::after {
+  content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px;
   background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
   border-radius: 50%; pointer-events: none;
 }
 .level-content { width: 100%; display: flex; justify-content: space-between; align-items: center; z-index: 1; }
-
-.sub-label { font-size: 11px; font-weight: 700; color: #86868b; letter-spacing: 1px; margin-bottom: 4px; display: block; }
-.rank-title { font-size: 32px; font-weight: 700; margin: 0 0 12px; background: linear-gradient(to right, #fff, #cecece); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.sub-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6) !important; letter-spacing: 1px; margin-bottom: 4px; display: block; }
+.rank-title { 
+  font-size: 32px; margin: 0 0 12px; font-weight: 800;
+  background: linear-gradient(to right, #fff 0%, #e0e0e0 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: white;
+}
+.points-info { text-align: right; }
+.points-val { font-size: 48px; font-weight: 700; line-height: 1; display: block; color: #34c759 !important; }
+.points-label { font-size: 13px; color: rgba(255,255,255,0.6) !important; margin-top: 4px; }
 .progress-bar { width: 200px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
 .fill { height: 100%; background: #34c759; transition: width 0.5s; }
-.progress-text { font-size: 12px; color: #86868b; margin: 0; }
+.progress-text { font-size: 12px; color: rgba(255,255,255,0.6) !important; margin: 0; }
 
-.points-info { text-align: right; }
-.points-val { font-size: 48px; font-weight: 700; color: #34c759; line-height: 1; letter-spacing: -1px; }
-.points-label { font-size: 13px; color: #86868b; margin-top: 4px; font-weight: 500; }
-
-/* --- 2. Split Layout (左右并排核心) --- */
-.split-layout {
-  display: grid;
-  grid-template-columns: 1fr 1.4fr; /* 左窄右宽比例 */
-  gap: 24px;
-  align-items: start;
+/* 2. Tabs Control (优化版 iOS 风格) */
+.tabs-control {
+  background: #e3e3e8; /* 稍微深一点的底色，增加对比 */
+  border-radius: 12px;
+  padding: 4px; /* 增加一点内边距 */
+  display: flex;
+  position: relative;
+  margin-bottom: 30px;
+  height: 48px; /* 稍微高一点，方便手指点击 */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* 内部阴影增加层次 */
 }
 
-/* 面板通用样式 */
-.panel { background: white; border-radius: 24px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); height: 100%; box-sizing: border-box; }
-.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.panel-header h3 { font-size: 18px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px; color: #1d1d1f; }
-.more-link { font-size: 13px; color: #0071e3; cursor: pointer; display: flex; align-items: center; gap: 2px; }
+/* 滑块本体 */
+.tab-slider {
+  position: absolute; 
+  top: 4px; bottom: 4px; left: 4px; 
+  width: calc(50% - 4px); /* 减去单边 padding，精确计算 */
+  background: white; 
+  border-radius: 9px; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.05); /* 更柔和的投影 */
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); /* iOS 经典回弹曲线 */
+  z-index: 1;
+}
+/* 滑块右移位置：移动 100% 自身宽度 */
+.tab-slider.right { transform: translateX(100%); }
 
-/* --- Badges Panel (Left) --- */
-.badges-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* 自适应小格子 */
-  gap: 16px;
+/* 按钮文字 */
+.tab-item {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 14px; font-weight: 600; 
+  color: #86868b; /* 默认灰色 */
+  z-index: 2; /* 文字必须在滑块上面 */
+  cursor: pointer; 
+  transition: color 0.3s;
+  user-select: none;
 }
-.badge-item {
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  cursor: pointer; transition: transform 0.2s;
-}
-.badge-item:hover { transform: translateY(-3px); }
-.badge-icon {
-  width: 64px; height: 64px; background: #f5f5f7; border-radius: 16px;
-  display: flex; align-items: center; justify-content: center; font-size: 32px;
-  position: relative; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
-}
-.badge-item:not(.locked) .badge-icon { background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-.badge-name { font-size: 12px; color: #1d1d1f; font-weight: 500; text-align: center; }
-.lock-mask { position: absolute; inset: 0; background: rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #999; border-radius: 16px; }
-.badge-item.locked .badge-icon { opacity: 0.6; filter: grayscale(100%); }
-.badge-item.locked .badge-name { color: #999; }
+/* 激活状态文字颜色变黑 */
+.tab-item.active { color: #1d1d1f; }
 
-/* --- Shop Panel (Right) --- */
-.shop-list { display: flex; flex-direction: column; gap: 16px; }
-.shop-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px; border-radius: 16px; background: #f9f9fa;
-  transition: all 0.2s;
-}
-.shop-item:hover { background: #f0f0f2; transform: scale(1.01); }
-.item-left { display: flex; align-items: center; gap: 14px; }
-.item-icon {
-  width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
-}
-.item-text h4 { font-size: 15px; font-weight: 600; margin: 0 0 2px; color: #1d1d1f; }
-.item-text p { font-size: 12px; color: #86868b; margin: 0; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 3. Badges Grid */
+.badges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.badge-item { background: white; border-radius: 20px; padding: 20px 10px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+.badge-item:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+.badge-icon-wrapper { width: 80px; height: 80px; margin: 0 auto 15px; background: #f2f2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; font-size: 40px; }
+.badge-item:not(.locked) .badge-icon-wrapper { background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+.badge-title { font-size: 15px; margin: 0 0 5px; color: #1d1d1f; }
+.badge-status { font-size: 12px; color: #34c759; font-weight: 500; margin: 0; }
+.badge-item.locked { opacity: 0.7; }
+.badge-item.locked .emoji-icon { filter: grayscale(100%) blur(2px); opacity: 0.3; }
+.lock-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #86868b; font-size: 24px; }
+.badge-item.locked .badge-status { color: #86868b; }
 
-.redeem-btn {
-  background: white; border: 1px solid #e5e5e5; color: #0071e3;
-  padding: 6px 14px; border-radius: 14px; font-weight: 600; font-size: 13px;
-  cursor: pointer; transition: 0.2s; min-width: 60px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-.redeem-btn:hover { background: #0071e3; color: white; border-color: #0071e3; }
-.redeem-btn.disabled { background: #f5f5f7; color: #ccc; border-color: transparent; cursor: not-allowed; box-shadow: none; }
-
-/* 响应式：屏幕窄时自动变回上下堆叠 */
-@media (max-width: 768px) {
-  .split-layout { grid-template-columns: 1fr; }
-}
+/* 4. Shop Grid (商城) */
+.shop-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.product-card { background: white; padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+.product-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
+.product-info { flex: 1; }
+.product-info h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: #1d1d1f; }
+.product-info p { margin: 0; font-size: 13px; color: #86868b; }
+.price-btn { background: #f2f2f7; color: #1d1d1f; border: none; padding: 8px 16px; border-radius: 16px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; min-width: 80px; }
+.price-btn:hover { background: #e5e5ea; }
+.price-btn.disabled { opacity: 0.5; cursor: not-allowed; color: #aaa; }
 
 .fade-up { animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
-.delay-1 { animation-delay: 0.2s; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .level-card { padding: 30px 24px !important; }
+}
 </style>
