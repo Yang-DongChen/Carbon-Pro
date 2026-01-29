@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useWikiStore = defineStore('wiki', () => {
-  // 这里模拟数据库里的文章数据
   const articles = ref([
     { 
       id: 1, 
