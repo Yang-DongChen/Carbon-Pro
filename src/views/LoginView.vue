@@ -99,6 +99,7 @@ const handleLogin = () => {
         <button class="login-btn" @click="handleLogin" :disabled="loading">
           <span v-if="!loading">登录</span>
           <span v-else class="loader"></span>
+          <el-icon v-if="!loading"><ArrowRight /></el-icon>
         </button>
       </div>
 
@@ -183,6 +184,10 @@ h2 {
   gap: 8px;
   transition: all 0.2s;
   margin-top: 10px;
+}
+.login-btn span,
+.login-btn .el-icon {
+  color: #ffffff !important;
 }
 .login-btn:hover {
   background: #000;
