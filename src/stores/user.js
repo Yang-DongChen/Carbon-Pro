@@ -1,17 +1,21 @@
 import { defineStore } from 'pinia' // 定义一个全局共享的“仓库”
 import { ref, reactive } from 'vue'
-import { useCarbonStore } from './carbon'//引入了另一个碳排放数据仓库
+import { useCarbonStore } from './carbon' // 引入了另一个碳排放数据仓库
 
 export const useUserStore = defineStore('user', () => {
   // 1. 初始化数据 (从本地读取用户信息)
-  const storedData = JSON.parse(localStorage.getItem('carbon_user_data'))
-
-
+  // 【关键修复1】：必须加上 || { ... } 保底。如果本地没数据，给一个默认对象，绝不能是 null！
+  const storedData = JSON.parse(localStorage.getItem('carbon_user_data')) || {
+    name: '低碳达人',
+    avatar: '', 
+    role: 'user', 
+    password: '123',
+    email: ''
+  }
 
   const userInfo = ref(storedData)
   const isLoggedIn = ref(!!localStorage.getItem('carbon_is_logged_in'))
-  const isMaintenance = ref(false)// 全局维护状态
-
+  const isMaintenance = ref(false) // 全局维护状态
 
   // 用户列表 (管理员用) - 优先从本地读取，确保持久化
   const defaultUserList = [
@@ -19,13 +23,13 @@ export const useUserStore = defineStore('user', () => {
     { id: 102, name: 'Amy', email: 'amy@terra.com', role: 'user', status: 'banned' },
   ]
 
-  const storedList = JSON.parse(localStorage.getItem('carbon_user_list')) || defaultUserList
-  const userList = reactive(storedList)
-
-
+  // 【关键修复2】：过滤掉花名册里可能因为缓存错误产生的 null 数据
+  let rawList = JSON.parse(localStorage.getItem('carbon_user_list')) || defaultUserList
+  rawList = rawList.filter(item => item !== null)
+  const userList = reactive(rawList)
   
   // 自动加载 Carbon 数据 (防止刷新丢失)
-  if (isLoggedIn.value && userInfo.value.email) {
+  if (isLoggedIn.value && userInfo.value?.email) {
     setTimeout(() => {
       const carbonStore = useCarbonStore()
       carbonStore.loadUserData(userInfo.value.email)
@@ -60,25 +64,25 @@ export const useUserStore = defineStore('user', () => {
     }
 
     // 3. 普通用户登录验证
-    // 1. 先去花名册里找这个邮箱
-    const existingUser = userList.find(u => u.email === inputEmail)
+    // 【关键修复3】：使用 u?.email 防爆雷。如果 u 不小心变成了 null，?. 会阻止程序崩溃
+    const existingUser = userList.find(u => u?.email === inputEmail)
     
-    // 【漏洞修复核心】：如果花名册里没有这个人，并且他也不是你刚在本地注册的那个账号
-    if (!existingUser && inputEmail !== userInfo.value.email) {
+    // 【关键修复4】：userInfo.value?.email 防爆雷
+    if (!existingUser && inputEmail !== userInfo.value?.email) {
       return { success: false, msg: '该账号不存在，请先注册或检查拼写' }
     }
 
-    // 2. 检查是否被封禁
+    // 4. 检查是否被封禁
     if (existingUser && existingUser.status === 'banned') {
       return { success: false, msg: '该账号已被封禁，请联系管理员' }
     }
 
-    // 3. 密码校验 (这里核对的是本地存储的真实密码)
-    if (inputPwd !== userInfo.value.password) {
+    // 5. 密码校验 (这里核对的是本地存储的真实密码)
+    if (inputPwd !== userInfo.value?.password) {
       return { success: false, msg: '密码错误，请重新输入' }
     }
     
-    // 登录成功：同步用户信息
+    // 6. 登录成功：同步用户信息
     if (existingUser) {
       // 如果是老用户，加载他的名字和角色
       userInfo.value.name = existingUser.name
@@ -106,6 +110,9 @@ export const useUserStore = defineStore('user', () => {
 
     const inputEmail = form.email.trim()
     
+    // 防爆雷：防止 userInfo.value 丢失
+    if (!userInfo.value) userInfo.value = {}
+
     // 更新当前登录态
     userInfo.value.name = inputEmail.split('@')[0] || '新用户'
     userInfo.value.email = inputEmail
@@ -114,7 +121,7 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value.role = 'user'
 
     // 添加到用户列表 (如果不存在)
-    const exists = userList.find(u => u.email === inputEmail)
+    const exists = userList.find(u => u?.email === inputEmail)
     if (!exists) {
       userList.push({
         id: Date.now(),
@@ -141,7 +148,9 @@ export const useUserStore = defineStore('user', () => {
 
   function logout() {
     isLoggedIn.value = false
-    userInfo.value.role = 'user'
+    if (userInfo.value) {
+       userInfo.value.role = 'user'
+    }
     localStorage.removeItem('carbon_is_logged_in')
     
     // 清除 Carbon Store 的会话数据 (但不删本地文件)
@@ -150,18 +159,19 @@ export const useUserStore = defineStore('user', () => {
   }
 
   function updateProfile(data) {
+    if (!userInfo.value) return
     if (data.name) userInfo.value.name = data.name
     if (data.avatar) userInfo.value.avatar = data.avatar
     
     // 同步更新用户列表里的数据
-    const currentUserInList = userList.find(u => u.email === userInfo.value.email)
+    const currentUserInList = userList.find(u => u?.email === userInfo.value?.email)
     if (currentUserInList && data.name) currentUserInList.name = data.name
     
     saveState()
   }
 
   function changePassword(oldPwd, newPwd) {
-    if (oldPwd !== userInfo.value.password) return false
+    if (!userInfo.value || oldPwd !== userInfo.value.password) return false
     userInfo.value.password = newPwd
     saveState()
     return true
