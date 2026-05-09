@@ -11,8 +11,12 @@ const form = reactive({ email: '', password: '' })
 const loading = ref(false)
 
 const handleLogin = () => {
+  //非空校验   用 ElMessage 弹窗警告
   if (!form.email || !form.password) return ElMessage.warning('请输入账号和密码')
+
   loading.value = true
+  
+  //用了一个 800 毫秒的延时器
   setTimeout(() => {
     const result = store.login(form)
     if (result.success) {

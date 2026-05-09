@@ -1,13 +1,11 @@
 import { createApp } from 'vue'
+
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-// 已移除深色模式 css-vars 引用
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-
 import './assets/main.css'
 
 const app = createApp(App)

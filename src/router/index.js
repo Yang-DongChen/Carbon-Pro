@@ -60,6 +60,8 @@ const router = createRouter({
   ]
 })
 
+
+//权限拦截逻辑（路由守卫）：在文件底部的 router.beforeEach 是系统的安全防线
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   if (userStore.isMaintenance && userStore.userInfo.role !== 'admin' && to.path !== '/login') {
