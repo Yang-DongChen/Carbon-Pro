@@ -34,6 +34,16 @@ const handleLogin = () => {
     }
   }, 800);
 };
+// 新增：处理跳转注册页的逻辑
+const goToRegister = () => {
+  // 如果仓库里的维护模式是开启的 (true)
+  if (store.isMaintenance) {
+    // 弹出红色错误提示，拦住他
+    return ElMessage.error(" 🚧 系统维护中，暂不开放新用户注册");
+  }
+  // 如果没在维护，就正常放行，跳转到注册页
+  router.push("/register");
+};
 </script>
 
 <template>
@@ -105,7 +115,13 @@ const handleLogin = () => {
 
       <div class="footer-links">
         <span
-          >没有账户? <router-link to="/register">立即注册</router-link>
+          >没有账户?
+          <a
+            href="javascript:void(0)"
+            @click="goToRegister"
+            style="cursor: pointer"
+            >立即注册</a
+          >
         </span>
         <span class="divider">|</span>
         <span class="tip">管理员: admin@terra.com / admin123</span>

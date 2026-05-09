@@ -105,6 +105,8 @@ export const useUserStore = defineStore('user', () => {
     return { success: true, role: 'user' }
   }
 
+  
+
   function register(form) {
     if (isMaintenance.value) return { success: false, msg: '维护期间暂停注册' }
 
