@@ -1,30 +1,29 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia' // 定义一个全局共享的“仓库”
 import { ref, reactive } from 'vue'
-import { useCarbonStore } from './carbon'
+import { useCarbonStore } from './carbon'//引入了另一个碳排放数据仓库
 
 export const useUserStore = defineStore('user', () => {
   // 1. 初始化数据 (从本地读取用户信息)
-  const storedData = JSON.parse(localStorage.getItem('carbon_user_data')) || {
-    name: '低碳达人',
-    avatar: '', 
-    role: 'user', 
-    password: '123' 
-  }
+  const storedData = JSON.parse(localStorage.getItem('carbon_user_data'))
+
+
 
   const userInfo = ref(storedData)
   const isLoggedIn = ref(!!localStorage.getItem('carbon_is_logged_in'))
+  const isMaintenance = ref(false)// 全局维护状态
 
-  // 全局维护状态
-  const isMaintenance = ref(false)
 
   // 用户列表 (管理员用) - 优先从本地读取，确保持久化
   const defaultUserList = [
     { id: 101, name: 'Jason', email: 'jason@terra.com', role: 'user', status: 'normal' },
     { id: 102, name: 'Amy', email: 'amy@terra.com', role: 'user', status: 'banned' },
   ]
+
   const storedList = JSON.parse(localStorage.getItem('carbon_user_list')) || defaultUserList
   const userList = reactive(storedList)
 
+
+  
   // 自动加载 Carbon 数据 (防止刷新丢失)
   if (isLoggedIn.value && userInfo.value.email) {
     setTimeout(() => {
@@ -39,7 +38,6 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // --- 核心动作 ---
-
   function login(form) {
     const inputEmail = (form.email || '').trim()
     const inputPwd = (form.password || '').trim()
@@ -62,16 +60,22 @@ export const useUserStore = defineStore('user', () => {
     }
 
     // 3. 普通用户登录验证
+    // 1. 先去花名册里找这个邮箱
     const existingUser = userList.find(u => u.email === inputEmail)
-
-    // 检查封禁状态
-    if (existingUser && existingUser.status === 'banned') {
-      return { success: false, msg: '该账号已被封禁' }
+    
+    // 【漏洞修复核心】：如果花名册里没有这个人，并且他也不是你刚在本地注册的那个账号
+    if (!existingUser && inputEmail !== userInfo.value.email) {
+      return { success: false, msg: '该账号不存在，请先注册或检查拼写' }
     }
 
-    // 密码校验：只允许正确密码 (移除了 123 后门)
+    // 2. 检查是否被封禁
+    if (existingUser && existingUser.status === 'banned') {
+      return { success: false, msg: '该账号已被封禁，请联系管理员' }
+    }
+
+    // 3. 密码校验 (这里核对的是本地存储的真实密码)
     if (inputPwd !== userInfo.value.password) {
-       return { success: false, msg: '密码错误' }
+      return { success: false, msg: '密码错误，请重新输入' }
     }
     
     // 登录成功：同步用户信息
