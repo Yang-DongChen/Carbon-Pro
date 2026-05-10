@@ -1,17 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
+//负责建路网     负责记录用户历史足迹
 import { useUserStore } from '../stores/user'
 
-// 路由懒加载：解决首屏加载慢和切换卡顿的问题
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { 
       path: '/', 
+      //这里的 path 完全是由你（开发者）来自由决定和命名的。
+      //它决定了用户在浏览器地址栏里到底会看到什么。
       name: 'home', 
-      component: () => import('../views/HomeView.vue'), // ⚡️ 懒加载
+      component: () => import('../views/HomeView.vue'), //懒加载
       meta: { requiresAuth: true } 
+      //meta 就是用来存一些自定义信息的
+      // 这里意思是：这个房间必须登录（Requires Auth）才能进
     },
-    { 
+    {
       path: '/login', 
       name: 'login', 
       component: () => import('../views/LoginView.vue') 
