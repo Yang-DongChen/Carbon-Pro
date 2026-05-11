@@ -7,8 +7,6 @@ import { Close, Check } from "@element-plus/icons-vue";
 const props = defineProps(["visible"]);
 const emit = defineEmits(["update:visible", "saved"]);
 const store = useCarbonStore();
-
-// 场景定义 (保持逻辑不变)
 const scenarios = [
   {
     id: "subway",
@@ -91,12 +89,14 @@ const scenarios = [
 ];
 
 const activeScenario = ref(null);
+//记录用户当前点开了哪一个具体场景
 const sliderValue = ref(0);
 
 const selectScenario = (item) => {
   activeScenario.value = item;
   sliderValue.value = item.default;
 };
+//?????
 
 const previewResult = computed(() => {
   if (!activeScenario.value) return { co2: 0, points: 0 };
@@ -114,16 +114,13 @@ const handleClose = () => {
 };
 
 const handleSave = () => {
-  if (!activeScenario.value) return;
   store.addRecord(sliderValue.value, activeScenario.value.type);
-
   ElMessage({
     message: `记录成功！减排 ${previewResult.value.co2} kg，积分 +${previewResult.value.points}`,
     type: "success",
     duration: 3000,
     offset: 60, // 手机端提示稍微靠下一点
   });
-
   emit("saved");
   handleClose();
 };
@@ -133,7 +130,6 @@ const handleSave = () => {
   <div v-if="visible" class="modal-overlay" @click.self="handleClose">
     <div class="modal-card fade-up">
       <div class="drag-handle"></div>
-
       <div class="modal-header">
         <div class="header-text">
           <h3>记录低碳行为</h3>
@@ -169,9 +165,9 @@ const handleSave = () => {
       <div v-else class="slider-panel fade-in">
         <div class="selected-header" @click="activeScenario = null">
           <span class="back-text">
-            <el-icon style="margin-right: 4px; vertical-align: middle"
-              ><ArrowLeft
-            /></el-icon>
+            <el-icon style="margin-right: 4px; vertical-align: middle">
+              <ArrowLeft />
+            </el-icon>
             返回
           </span>
           <div
@@ -205,16 +201,16 @@ const handleSave = () => {
         <div class="live-preview">
           <div class="preview-item">
             <span class="p-label">成功减排</span>
-            <span class="p-val green-text"
-              >-{{ previewResult.co2 }} <small>kg</small></span
-            >
+            <span class="p-val green-text">
+              -{{ previewResult.co2 }} <small>kg</small>
+            </span>
           </div>
           <div class="preview-divider"></div>
           <div class="preview-item">
             <span class="p-label">获得奖励</span>
-            <span class="p-val highlight"
-              >+{{ previewResult.points }} <small>pts</small></span
-            >
+            <span class="p-val highlight">
+              +{{ previewResult.points }} <small>pts</small>
+            </span>
           </div>
         </div>
 
@@ -223,7 +219,7 @@ const handleSave = () => {
           @click="handleSave"
           :style="{ background: activeScenario.color }"
         >
-          <el-icon style="margin-right: 6px"><Check /></el-icon> 确认记录
+          <el-icon style="margin-right: 6px"><Check /></el-icon> 
         </button>
       </div>
     </div>

@@ -18,8 +18,7 @@ let myChart = null;
 const heroImages = [
   "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2560&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1501854140884-074bf64cad1c?q=80&w=2560&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?q=80&w=2560&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=2560&auto=format&fit=crop"
 ];
 const swiperModules = [Autoplay, EffectFade];
 
@@ -151,23 +150,6 @@ watch(
 </template>
 
 <style scoped>
-@keyframes jelly-bounce {
-  0% {
-    transform: scale(1.05);
-  }
-  30% {
-    transform: scale(1.15) skewX(-2deg);
-  }
-  50% {
-    transform: scale(1.08) skewX(1deg);
-  }
-  70% {
-    transform: scale(1.12);
-  }
-  100% {
-    transform: scale(1.1);
-  }
-}
 .home-view {
   min-height: 100vh;
   padding-top: 50px;
@@ -252,15 +234,21 @@ watch(
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.05);
-  transition: transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: scale(1.02);
+  /* 修改点 1：把 transition 里的 opacity 换成 filter */
+  transition:
+    transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter 0.8s ease;
   will-change: transform;
-  opacity: 0.9;
+
+  /* 修改点 2：彻底删掉 opacity: 0.9，换成滤镜：亮度 90% */
+  filter: brightness(0.9);
 }
+
 .interactive-container:hover .hero-img-slider {
-  transition: none;
-  animation: jelly-bounce 0.8s cubic-bezier(0.25, 0.8, 0.25, 1.5) forwards;
-  opacity: 1;
+  transform: scale(1.12);
+  /* 修改点 3：鼠标放上去时，把亮度拉回 100%（原图亮度） */
+  filter: brightness(1);
 }
 .glass-overlay {
   position: absolute;

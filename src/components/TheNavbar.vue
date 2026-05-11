@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive } from "vue";
 import { useRouter, useRoute } from "vue-router";
+//控制页面跳转   获取当前网页地址
 import { useUserStore } from "../stores/user";
 import {
   CaretBottom,
@@ -16,7 +17,8 @@ import {
   Reading,
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-
+//顶部弹窗    中间弹窗
+// 开始激活
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
@@ -24,6 +26,7 @@ const userStore = useUserStore();
 const showAvatarDialog = ref(false);
 const showProfileDialog = ref(false);
 const showPasswordDialog = ref(false);
+
 const tempAvatar = ref("");
 const profileForm = reactive({ name: "" });
 const passwordForm = reactive({ oldPass: "", newPass: "", confirmPass: "" });
@@ -163,43 +166,40 @@ const triggerFileInput = () => {
                   :src="userStore.userInfo.avatar"
                   class="avatar-img"
                 />
-                <span v-else>{{
-                  userStore.userInfo.name
-                    ? userStore.userInfo.name.charAt(0).toUpperCase()
-                    : "U"
-                }}</span>
+                <span v-else
+                  >{{
+                    userStore.userInfo.name
+                      ? userStore.userInfo.name.charAt(0).toUpperCase()
+                      : "U"
+                  }}
+                </span>
               </div>
-              <span class="username desktop-only">{{
-                userStore.userInfo.name
-              }}</span>
-              <el-icon class="dropdown-arrow desktop-only"
-                ><CaretBottom
-              /></el-icon>
+              <span class="username desktop-only">
+                {{ userStore.userInfo.name }}
+              </span>
+              <el-icon class="dropdown-arrow desktop-only">
+                <CaretBottom />
+              </el-icon>
             </div>
             <template #dropdown>
               <el-dropdown-menu class="custom-dropdown">
-                <el-dropdown-item
-                  v-if="userStore.userInfo.role === 'admin'"
-                  command="admin"
-                  style="color: #0071e3; font-weight: 600"
-                  >管理后台</el-dropdown-item
-                >
-                <el-dropdown-item command="avatar" :icon="Camera"
-                  >修改头像</el-dropdown-item
-                >
-                <el-dropdown-item command="profile" :icon="Edit"
-                  >修改个人信息</el-dropdown-item
-                >
-                <el-dropdown-item command="password" :icon="Key"
-                  >修改密码</el-dropdown-item
-                >
+                <el-dropdown-item command="avatar" :icon="Camera">
+                  修改头像
+                </el-dropdown-item>
+                <el-dropdown-item command="profile" :icon="Edit">
+                  修改个人信息
+                </el-dropdown-item>
+                <el-dropdown-item command="password" :icon="Key">
+                  修改密码
+                </el-dropdown-item>
                 <el-dropdown-item
                   divided
                   command="logout"
                   :icon="SwitchButton"
                   class="danger-item"
-                  >退出登录</el-dropdown-item
                 >
+                  退出登录
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -212,34 +212,44 @@ const triggerFileInput = () => {
         to="/"
         class="tab-item"
         :class="{ active: route.path === '/' }"
-        ><el-icon><HomeFilled /></el-icon><span>概览</span></router-link
       >
+        <el-icon><HomeFilled /></el-icon>
+        <span>概览</span>
+      </router-link>
       <router-link
         to="/analysis"
         class="tab-item"
         :class="{ active: route.path === '/analysis' }"
-        ><el-icon><DataAnalysis /></el-icon><span>分析</span></router-link
       >
+        <el-icon><DataAnalysis /></el-icon>
+        <span>分析</span>
+      </router-link>
       <router-link
         to="/history"
         class="tab-item"
         :class="{ active: route.path === '/history' }"
-        ><el-icon><Clock /></el-icon><span>历史</span></router-link
       >
+        <el-icon><Clock /></el-icon>
+        <span>历史</span>
+      </router-link>
       <router-link
         to="/rewards"
         class="tab-item"
         :class="{ active: route.path === '/rewards' }"
-        ><el-icon><Medal /></el-icon><span>权益</span></router-link
       >
+        <el-icon><Medal /></el-icon>
+        <span>权益</span>
+      </router-link>
       <router-link
         to="/wiki"
         class="tab-item"
         :class="{ active: route.path === '/wiki' }"
-        ><el-icon><Reading /></el-icon><span>百科</span></router-link
       >
+        <el-icon><Reading /></el-icon>
+        <span>百科</span>
+      </router-link>
     </div>
-
+    <!-- 更换头像弹窗 -->
     <el-dialog
       v-model="showAvatarDialog"
       title="更换头像"
@@ -251,8 +261,8 @@ const triggerFileInput = () => {
       <div class="avatar-uploader" @click="triggerFileInput">
         <img v-if="tempAvatar" :src="tempAvatar" class="preview-img" />
         <div v-else class="upload-placeholder">
-          <el-icon class="upload-icon"><UploadFilled /></el-icon
-          ><span>点击上传图片</span>
+          <el-icon class="upload-icon"><UploadFilled /></el-icon>
+          <span>点击上传图片</span>
         </div>
         <input
           type="file"
@@ -262,14 +272,14 @@ const triggerFileInput = () => {
           style="display: none"
         />
       </div>
-      <template #footer
-        ><div class="dialog-footer">
-          <el-button @click="showAvatarDialog = false">取消</el-button
-          ><el-button type="primary" @click="saveAvatar" color="#1d1d1f"
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showAvatarDialog = false">取消</el-button>
+          <el-button type="primary" @click="saveAvatar" color="#1d1d1f"
             >保存</el-button
           >
-        </div></template
-      >
+        </div>
+      </template>
     </el-dialog>
     <el-dialog
       v-model="showProfileDialog"
@@ -280,17 +290,19 @@ const triggerFileInput = () => {
       append-to-body
     >
       <div class="form-item">
-        <label>用户昵称</label><el-input v-model="profileForm.name" />
+        <label>用户昵称</label>
+        <el-input v-model="profileForm.name" />
       </div>
-      <template #footer
-        ><div class="dialog-footer">
+      <template #footer>
+        <div class="dialog-footer">
           <el-button @click="showProfileDialog = false">取消</el-button
           ><el-button type="primary" @click="saveProfile" color="#1d1d1f"
             >保存</el-button
           >
-        </div></template
-      >
+        </div>
+      </template>
     </el-dialog>
+
     <el-dialog
       v-model="showPasswordDialog"
       title="安全设置"
@@ -301,24 +313,24 @@ const triggerFileInput = () => {
     >
       <div class="form-group">
         <div class="form-item">
-          <label>当前密码</label
-          ><el-input
+          <label>当前密码</label>
+          <el-input
             v-model="passwordForm.oldPass"
             type="password"
             show-password
           />
         </div>
         <div class="form-item">
-          <label>新密码</label
-          ><el-input
+          <label>新密码</label>
+          <el-input
             v-model="passwordForm.newPass"
             type="password"
             show-password
           />
         </div>
         <div class="form-item">
-          <label>确认新密码</label
-          ><el-input
+          <label>确认新密码</label>
+          <el-input
             v-model="passwordForm.confirmPass"
             type="password"
             show-password
@@ -451,7 +463,6 @@ const triggerFileInput = () => {
     justify-content: space-around;
     align-items: center;
     z-index: 1000;
-    padding-bottom: env(safe-area-inset-bottom);
   }
   .tab-item {
     display: flex;
