@@ -18,7 +18,7 @@ let myChart = null;
 const heroImages = [
   "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2560&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=2560&auto=format&fit=crop"
+  "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=2560&auto=format&fit=crop",
 ];
 const swiperModules = [Autoplay, EffectFade];
 
@@ -106,18 +106,17 @@ watch(
         </div>
         <div class="hero-image-box interactive-container">
           <swiper
-            :modules="swiperModules"
+            :modules="[Autoplay]"
             :slides-per-view="1"
             :space-between="0"
             :loop="true"
-            effect="fade"
             :autoplay="{ delay: 4000, disableOnInteraction: false }"
-            :speed="1200"
+            :speed="800"
             class="hero-swiper"
           >
-            <swiper-slide v-for="(img, index) in heroImages" :key="index"
-              ><img :src="img" class="hero-img-slider" alt="Hero Image"
-            /></swiper-slide>
+            <swiper-slide v-for="(img, index) in heroImages" :key="index">
+              <img :src="img" class="hero-img-slider" alt="Hero Image" />
+            </swiper-slide>
           </swiper>
 
           <div class="glass-overlay">
@@ -227,27 +226,26 @@ watch(
   background: #000;
 }
 .hero-swiper {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+}
+:deep(.swiper-slide) {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden;
 }
 .hero-img-slider {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.02);
-  /* 修改点 1：把 transition 里的 opacity 换成 filter */
-  transition:
-    transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    filter 0.8s ease;
-  will-change: transform;
-
-  /* 修改点 2：彻底删掉 opacity: 0.9，换成滤镜：亮度 90% */
-  filter: brightness(0.9);
+  display: block;
 }
 
 .interactive-container:hover .hero-img-slider {
   transform: scale(1.12);
-  /* 修改点 3：鼠标放上去时，把亮度拉回 100%（原图亮度） */
   filter: brightness(1);
 }
 .glass-overlay {
@@ -351,6 +349,7 @@ watch(
 .delay {
   animation-delay: 0.2s;
 }
+
 @keyframes fadeUp {
   to {
     opacity: 1;
@@ -374,8 +373,12 @@ watch(
     font-size: 40px;
   }
   .hero-image-box {
-    width: 100%;
-    height: 300px;
+    /* 【核心绝杀】：必须加 !important，彻底废掉它继承的 flex 放大属性 */
+    flex: none !important;
+    width: 100% !important;
+    height: 240px !important;
+    min-height: 240px !important; /* 加个保底，绝不许变高 */
+    display: block !important;
   }
   .white-card {
     flex-direction: column;
