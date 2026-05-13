@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useCarbonStore = defineStore('carbon', () => {
-  // --- 初始默认值 ---
   const initialBadges = [
     { id: 1, title: '初次见面', icon: '🌱', desc: '完成第 1 次碳排记录', unlocked: false },
     { id: 2, title: '低碳先行者', icon: '🚀', desc: '累计减排达到 10kg', unlocked: false },
@@ -11,12 +10,10 @@ export const useCarbonStore = defineStore('carbon', () => {
     { id: 5, title: '行万里路', icon: '🚲', desc: '累计绿色出行 500km', unlocked: false },
     { id: 6, title: '地球卫士', icon: '🛡️', desc: '累计减排达到 100kg', unlocked: false }
   ]
-
   // --- State (状态) ---
   const records = ref([])
   const badges = ref(JSON.parse(JSON.stringify(initialBadges)))
   const points = ref(0)
-  
   // ★★★ 新增：当前用户的唯一标识 (邮箱)
   const currentUserKey = ref('')
 

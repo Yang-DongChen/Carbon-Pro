@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue"; // ★★★ 引入 watch
+import { ref, computed, onMounted, watch } from "vue";
 import TheNavbar from "../components/TheNavbar.vue";
 import { useCarbonStore } from "../stores/carbon";
 import * as echarts from "echarts";
@@ -12,19 +12,18 @@ import {
 } from "@element-plus/icons-vue";
 
 const store = useCarbonStore();
-const chartRef = ref(null);
+const chartRef = ref(null);//空画布
 const loading = ref(false);
 const aiReport = ref("");
 const isTyping = ref(false);
-let myChart = null; // 保存图表实例
+let myChart = null;
 
-// 1. 数据聚合
 const analysisData = computed(() => {
   const records = store.records;
   const summary = {
     traffic: records
-      .filter((r) => r.type === "traffic")
-      .reduce((sum, r) => sum + parseFloat(r.co2), 0),
+      .filter((r) => r.type === "traffic")//筛选器
+      .reduce((sum, r) => sum + parseFloat(r.co2), 0),//遍历，算出最终的sum
     food: records
       .filter((r) => r.type === "food")
       .reduce((sum, r) => sum + parseFloat(r.co2), 0),
@@ -38,12 +37,11 @@ const analysisData = computed(() => {
   return summary;
 });
 
-// 2. 模拟调用 AI API
-const generateReport = async () => {
+const generateReport = async () => { //异步
   if (analysisData.value.count === 0) {
     aiReport.value =
-      "暂无数据。请先去首页添加一些碳排记录，AI 才能为您进行分析哦。";
-    initChart(); // 即使没数据也渲染空图表
+      "暂无数据。请先去首页添加一些碳排记录,AI 才能为您进行分析哦。";
+    initChart();
     return;
   }
 
@@ -53,33 +51,30 @@ const generateReport = async () => {
   setTimeout(() => {
     loading.value = false;
     const { traffic, food, energy, total } = analysisData.value;
-
-    // 生成报告逻辑...
-    let content = `📊 Carbon AI 深度评估报告\n\n`;
-    content += `**总碳排放量：${total.toFixed(2)} kg**\n\n`;
+    
+    let content = `📊 Carbon AI 深度减排评估报告\n\n`;
+    content += `**累计减少碳排放：${total.toFixed(2)} kg**\n\n`;
     content += `**💡 核心洞察：**\n`;
 
     if (traffic > food && traffic > energy) {
-      content += `本周您的**出行碳排**占比最高 (${traffic.toFixed(1)}kg)。建议尝试减少私家车使用，预计可减少 20% 的排放。\n\n`;
+      content += `太棒了！您的**低碳出行**对减排贡献最大 (${traffic.toFixed(1)}kg)。继续保持乘坐公共交通的习惯，您是城市绿色出行的先锋。\n\n`;
     } else if (food > traffic && food > energy) {
-      content += `数据显示**饮食消费**是您的主要碳排来源 (${food.toFixed(1)}kg)。肉类消费可能偏高，建议尝试“周一无肉日”。\n\n`;
+      content += `数据显示**绿色饮食**是您的主要减排来源 (${food.toFixed(1)}kg)。素食和少用一次性餐具不仅健康，更对地球充满善意。\n\n`;
     } else {
-      content += `您的**家庭能耗**控制得当，但仍有优化空间。随手关灯、调高空调1度，都能积少成多。\n\n`;
+      content += `您的**节能习惯**表现得非常出色！随手关灯、调高空调温度，这些日常小事已经为您积累了可观的减排成就。\n\n`;
     }
-
     content += `**🌟 AI 建议：**\n`;
-    content += `- 继续保持目前的记录习惯，数据越丰富，分析越精准。\n`;
+    content += `- 您的低碳生活已初见成效，建议尝试解锁更多场景的环保行为！\n`;
 
     typeWriter(content);
     initChart();
   }, 1000);
 };
-
-// 打字机特效
+// 打字机
 const typeWriter = (text) => {
   isTyping.value = true;
   let i = 0;
-  aiReport.value = ""; // 清空旧文案
+  aiReport.value = "";
   const speed = 20;
   const type = () => {
     if (i < text.length) {
@@ -93,22 +88,17 @@ const typeWriter = (text) => {
   type();
 };
 
-// 初始化图表
 const initChart = () => {
   if (!chartRef.value) return;
-  // 如果已存在实例，先销毁或复用，这里使用 setOption 更新
   if (!myChart) myChart = echarts.init(chartRef.value);
-
   const { traffic, food, energy } = analysisData.value;
-  // 如果没有数据，显示灰色占位
   const isDataEmpty = traffic + food + energy === 0;
-
   const option = {
     tooltip: { trigger: "item" },
     legend: { bottom: "0%", left: "center" },
     series: [
       {
-        name: "排放来源",
+        name: "减排贡献构成",
         type: "pie",
         radius: ["40%", "70%"],
         avoidLabelOverlap: false,
@@ -118,9 +108,21 @@ const initChart = () => {
         data: isDataEmpty
           ? [{ value: 0, name: "暂无数据", itemStyle: { color: "#eee" } }]
           : [
-              { value: traffic, name: "出行", itemStyle: { color: "#0071e3" } },
-              { value: food, name: "饮食", itemStyle: { color: "#ff9500" } },
-              { value: energy, name: "能耗", itemStyle: { color: "#34c759" } },
+              {
+                value: traffic,
+                name: "低碳出行",
+                itemStyle: { color: "#0071e3" },
+              },
+              {
+                value: food,
+                name: "绿色饮食",
+                itemStyle: { color: "#ff9500" },
+              },
+              {
+                value: energy,
+                name: "环保节能",
+                itemStyle: { color: "#34c759" },
+              },
             ],
       },
     ],
@@ -128,7 +130,6 @@ const initChart = () => {
   myChart.setOption(option);
 };
 
-// ★★★ 监听数据变化，自动更新报告 ★★★
 watch(
   () => store.records,
   () => {
@@ -152,13 +153,12 @@ onMounted(() => {
         <h1>AI 智能分析</h1>
         <p>基于 {{ analysisData.count }} 条数据的深度洞察</p>
       </div>
-
       <div class="dashboard-grid">
         <div class="card report-card">
           <div class="card-header">
-            <span class="title-icon"
-              ><el-icon><DataAnalysis /></el-icon> AI 评估报告</span
-            >
+            <span class="title-icon">
+              <el-icon><DataAnalysis /></el-icon> AI 评估报告
+            </span>
             <button
               class="refresh-btn"
               @click="generateReport"
@@ -198,16 +198,18 @@ onMounted(() => {
             <h3>环保指数</h3>
             <div class="score-circle">
               <span class="score-num">{{
-                Math.max(0, 100 - Math.floor(analysisData.total / 10)).toFixed(
-                  0,
-                )
-              }}</span>
+                Math.min(100, 60 + Math.floor(analysisData.total / 5)).toFixed(0)
+              }}
+              </span>
               <span class="score-label">分</span>
             </div>
             <p class="score-desc">
               击败了全国
               {{
-                Math.min(99, Math.max(10, 100 - analysisData.total)).toFixed(0)
+                Math.min(
+                  99,
+                  Math.max(10, 10 + Math.floor(analysisData.total / 2)),
+                ).toFixed(0)
               }}% 的用户
             </p>
           </div>
