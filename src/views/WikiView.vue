@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useWikiStore } from "../stores/wiki";
 import TheNavbar from "../components/TheNavbar.vue";
-import { Search, Reading } from "@element-plus/icons-vue";
 
 const router = useRouter();
 const wikiStore = useWikiStore();

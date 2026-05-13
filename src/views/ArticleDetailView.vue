@@ -3,7 +3,6 @@ import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWikiStore } from "../stores/wiki";
 import TheNavbar from "../components/TheNavbar.vue";
-import { ArrowLeft, Timer } from "@element-plus/icons-vue";
 
 const route = useRoute();
 const router = useRouter();

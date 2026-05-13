@@ -3,10 +3,6 @@ import { ref } from "vue";
 import TheNavbar from "../components/TheNavbar.vue";
 import { useCarbonStore } from "../stores/carbon";
 import {
-  Trophy,
-  ShoppingBag,
-  Lock,
-  ArrowRight,
   Van,
   Bicycle,
   Ticket,

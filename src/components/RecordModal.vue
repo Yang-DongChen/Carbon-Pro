@@ -89,14 +89,12 @@ const scenarios = [
 ];
 
 const activeScenario = ref(null);
-//记录用户当前点开了哪一个具体场景
 const sliderValue = ref(0);
 
 const selectScenario = (item) => {
   activeScenario.value = item;
   sliderValue.value = item.default;
 };
-//?????
 
 const previewResult = computed(() => {
   if (!activeScenario.value) return { co2: 0, points: 0 };
