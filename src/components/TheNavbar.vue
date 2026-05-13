@@ -1,7 +1,6 @@
 <script setup>
 import { ref, reactive } from "vue";
 import { useRouter, useRoute } from "vue-router";
-//控制页面跳转   获取当前网页地址
 import { useUserStore } from "../stores/user";
 import {
   CaretBottom,
@@ -17,8 +16,7 @@ import {
   Reading,
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-//顶部弹窗    中间弹窗
-// 开始激活
+
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
@@ -249,7 +247,7 @@ const triggerFileInput = () => {
         <span>百科</span>
       </router-link>
     </div>
-    <!-- 更换头像弹窗 -->
+    
     <el-dialog
       v-model="showAvatarDialog"
       title="更换头像"
