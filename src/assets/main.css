@@ -1,6 +1,3 @@
-/* src/assets/main.css */
-
-/* 1. 仅保留浅色模式变量 */
 :root {
   --bg-page: #f5f5f7;
   --bg-card: #ffffff;
@@ -14,7 +11,6 @@
   --input-bg: #f9f9fa;
 }
 
-/* 2. 全局基础样式 */
 body {
   background-color: var(--bg-page);
   color: var(--text-primary);
@@ -22,9 +18,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
 }
 
-/* 3. 通用类名适配 */
-/* ★★★ 注意：已删除 .level-card，防止它被强制变白 ★★★ */
-.white-card, .card, .panel, .login-card, .register-card, .modal-card, .record-list, .bento-card, .article-page {
+.record-list, .article-page {
   background-color: var(--bg-card) !important;
   color: var(--text-primary) !important;
   box-shadow: 0 4px 12px var(--shadow-color) !important;
@@ -32,7 +26,7 @@ body {
 }
 
 h1, h2, h3, h4, strong { color: var(--text-primary) !important; }
-p, span, .label, .unit { color: var(--text-secondary); }
+p,.label, .unit { color: var(--text-secondary); }
 
 input, .el-input__wrapper {
   background-color: var(--input-bg) !important;
@@ -40,7 +34,6 @@ input, .el-input__wrapper {
   color: var(--text-primary) !important;
 }
 
-/* 移动端适配修正 */
 @media (max-width: 768px) {
   .content { 
     padding: 20px 16px !important; 
@@ -49,7 +42,7 @@ input, .el-input__wrapper {
     box-sizing: border-box;
     overflow-x: hidden;
   }
-  .dashboard, .split-layout, .shop-grid {
+  .shop-grid {
     display: flex !important;
     flex-direction: column !important;
     gap: 20px !important;
@@ -59,25 +52,6 @@ input, .el-input__wrapper {
     grid-template-columns: repeat(3, 1fr) !important; 
     gap: 15px !important;
   }
-  .hero {
-    height: auto !important;
-    min-height: 500px; 
-    margin-bottom: 30px !important;
-    flex-direction: column-reverse !important; 
-    gap: 0 !important;
-  }
-  .hero-image-box {
-    width: 100% !important;
-    height: 280px !important;
-    margin-bottom: 20px;
-  }
-  .white-card {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    height: auto !important;
-  }
-  .stat-info { width: 100% !important; margin-bottom: 20px; }
-  .chart-container { width: 100% !important; height: 220px !important; }
-  /* 修复等级卡片在移动端的高度 */
+
   .level-card { height: auto !important; padding: 30px 24px !important; }
 }
