@@ -10,8 +10,6 @@ const router = useRouter();
 const wikiStore = useWikiStore();
 
 const articleId = route.params.id;
-
-// 2. 去 Store 里找对应的文章
 const article = computed(() => wikiStore.getArticleById(articleId));
 
 const goBack = () => {

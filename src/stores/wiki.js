@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 export const useWikiStore = defineStore('wiki', () => {
   const articles = ref([
-    { 
+    {
       id: 1, 
       title: '为什么减少牛肉消费能救地球？', 
       desc: '牛肉生产的碳排放是猪肉的4倍，鸡肉的10倍。了解畜牧业对温室效应的巨大影响，以及植物性饮食的替代方案。', 
@@ -11,7 +11,6 @@ export const useWikiStore = defineStore('wiki', () => {
       color: '#ff9500', 
       image: '/wiki/food.jpg', 
       readTime: '5 min',
-      // 下面是文章正文 (支持 HTML 格式)
       content: `
         <h3>🥩 被忽视的碳排放巨头</h3>
         <p>当我们谈论气候变化时，通常会想到冒着黑烟的工厂或堵塞的高速公路。但实际上，你盘子里的牛排可能比你的汽车对地球的影响更大。</p>
@@ -94,7 +93,6 @@ export const useWikiStore = defineStore('wiki', () => {
     }
   ])
 
-  // 根据 ID 获取文章的方法
   const getArticleById = (id) => {
     return articles.value.find(a => a.id == Number(id))
   }

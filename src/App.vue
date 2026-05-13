@@ -11,7 +11,6 @@ import { RouterView } from 'vue-router'
 </template>
 
 <style>
-/* 路由切换动画 */
 .fade-enter-active,
 .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from,
