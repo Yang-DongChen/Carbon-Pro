@@ -14,6 +14,7 @@ import {
   Clock,
   Medal,
   Reading,
+  ChatDotRound, // 新增：社区图标
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
@@ -153,6 +154,9 @@ const triggerFileInput = () => {
           <router-link to="/wiki" class="nav-item" active-class="active"
             >百科</router-link
           >
+          <router-link to="/community" class="nav-item" active-class="active"
+            >社区</router-link
+          >
         </div>
 
         <div class="nav-right">
@@ -246,8 +250,16 @@ const triggerFileInput = () => {
         <el-icon><Reading /></el-icon>
         <span>百科</span>
       </router-link>
+      <router-link
+        to="/community"
+        class="tab-item"
+        :class="{ active: route.path === '/community' }"
+      >
+        <el-icon><ChatDotRound /></el-icon>
+        <span>社区</span>
+      </router-link>
     </div>
-    
+
     <el-dialog
       v-model="showAvatarDialog"
       title="更换头像"

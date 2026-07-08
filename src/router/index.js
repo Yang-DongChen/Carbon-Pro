@@ -55,6 +55,12 @@ const router = createRouter({
       component: () => import('../views/HistoryView.vue'), 
       meta: { requiresAuth: true } 
     },
+        {
+  path: '/community',
+  name: 'community',
+  component: () => import('../views/CommunityView.vue'),
+  meta: { requiresAuth: true }
+},
     { 
       path: '/admin', 
       name: 'admin', 
