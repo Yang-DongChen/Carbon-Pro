@@ -112,15 +112,14 @@
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { ChatDotRound } from "@element-plus/icons-vue";
-// 正确引入你的导航栏组件
 import TheNavbar from "../components/TheNavbar.vue";
 
-// --- 状态定义 ---
+
 const newPostContent = ref("");
 const posts = ref([]);
 const currentUser = ref({ name: "低碳达人", avatar: "", role: "user" });
 
-// --- 预设数据 ---
+
 const defaultPosts = [
   {
     id: 1002,
@@ -148,7 +147,7 @@ const defaultPosts = [
   },
 ];
 
-// --- 初始化 ---
+
 onMounted(() => {
   const storedUser = localStorage.getItem("carbon_user_data");
   if (storedUser) {
@@ -212,12 +211,11 @@ const focusComment = () => {
 </script>
 
 <style scoped>
-/* 保持与百科页面一致的底层样式 */
 .community-page {
   min-height: 100vh;
   padding-top: 52px;
   background: #f5f5f7;
-  padding-bottom: 60px; /* 给手机端底部留白 */
+  padding-bottom: 60px;
 }
 .content {
   max-width: 900px;
@@ -334,10 +332,10 @@ const focusComment = () => {
   color: #1d1d1f;
 }
 .interaction-btn.liked {
-  color: #0071e3; /* 苹果蓝 */
+  color: #0071e3;
 }
 
-/* 动画效果 (与你百科页面的动画完全一致) */
+
 .fade-up {
   animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   opacity: 0;
@@ -357,7 +355,6 @@ const focusComment = () => {
   }
 }
 
-/* 列表过渡动画 */
 .list-enter-active,
 .list-leave-active {
   transition: all 0.5s ease;

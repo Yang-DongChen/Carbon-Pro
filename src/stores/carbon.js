@@ -14,10 +14,9 @@ export const useCarbonStore = defineStore('carbon', () => {
   const records = ref([])
   const badges = ref(JSON.parse(JSON.stringify(initialBadges)))
   const points = ref(0)
-  // ★★★ 新增：当前用户的唯一标识 (邮箱)
+
   const currentUserKey = ref('')
 
-  // --- Getters (计算属性) ---
   const totalCo2Saved = computed(() => {
     return records.value.reduce((sum, r) => sum + parseFloat(r.co2), 0)
   })
@@ -45,33 +44,26 @@ export const useCarbonStore = defineStore('carbon', () => {
     return { days, values }
   })
 
-  // --- Actions (动作) ---
-
-  // ★★★ 核心修复1：根据用户邮箱加载数据
   function loadUserData(email) {
     if (!email) return
-    currentUserKey.value = `terra_data_${email}` // 生成用户专属 Key
+    currentUserKey.value = `terra_data_${email}` 
 
-    // 尝试从本地读取该用户的数据
     const savedData = localStorage.getItem(currentUserKey.value)
     
     if (savedData) {
-      // 如果有老数据，就加载
       const parsed = JSON.parse(savedData)
       records.value = parsed.records || []
       badges.value = parsed.badges || JSON.parse(JSON.stringify(initialBadges))
       points.value = parsed.points || 0
     } else {
-      // 如果是新用户，初始化为空状态
       records.value = []
       badges.value = JSON.parse(JSON.stringify(initialBadges))
       points.value = 0
     }
   }
 
-  // ★★★ 核心修复2：保存数据到用户专属 Key
   const saveState = () => {
-    if (!currentUserKey.value) return // 未登录不保存
+    if (!currentUserKey.value) return 
     
     const dataToSave = {
       records: records.value,
@@ -81,13 +73,11 @@ export const useCarbonStore = defineStore('carbon', () => {
     localStorage.setItem(currentUserKey.value, JSON.stringify(dataToSave))
   }
 
-  // ★★★ 核心修复3：退出登录时，只清内存，不删文件！
   function clearSession() {
     records.value = []
     points.value = 0
     badges.value = JSON.parse(JSON.stringify(initialBadges))
     currentUserKey.value = ''
-    // 注意：这里不再调用 localStorage.removeItem，确保数据保留在硬盘上
   }
 
   function addRecord(val, type) {
@@ -110,7 +100,7 @@ export const useCarbonStore = defineStore('carbon', () => {
 
     points.value += earnedPoints
     checkBadges()
-    saveState() // 保存
+    saveState() 
 
     return { co2, earnedPoints }
   }
@@ -121,13 +111,13 @@ export const useCarbonStore = defineStore('carbon', () => {
     if (records.value.length >= 100 && !badges.value[2].unlocked) badges.value[2].unlocked = true
     const foodCount = records.value.filter(r => r.type === 'food').length
     if (foodCount >= 10 && !badges.value[3].unlocked) badges.value[3].unlocked = true
-    saveState() // 状态变了就保存
+    saveState() 
   }
 
   function redeem(cost) {
     if (points.value >= cost) {
       points.value -= cost
-      saveState() // 积分变了就保存
+      saveState() 
       return true
     }
     return false

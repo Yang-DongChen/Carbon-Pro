@@ -12,7 +12,7 @@ import {
 } from "@element-plus/icons-vue";
 
 const store = useCarbonStore();
-const chartRef = ref(null);//空画布
+const chartRef = ref(null);
 const loading = ref(false);
 const aiReport = ref("");
 const isTyping = ref(false);
@@ -22,8 +22,8 @@ const analysisData = computed(() => {
   const records = store.records;
   const summary = {
     traffic: records
-      .filter((r) => r.type === "traffic")//筛选器
-      .reduce((sum, r) => sum + parseFloat(r.co2), 0),//遍历，算出最终的sum
+      .filter((r) => r.type === "traffic")
+      .reduce((sum, r) => sum + parseFloat(r.co2), 0),
     food: records
       .filter((r) => r.type === "food")
       .reduce((sum, r) => sum + parseFloat(r.co2), 0),
@@ -37,7 +37,7 @@ const analysisData = computed(() => {
   return summary;
 });
 
-const generateReport = async () => { //异步
+const generateReport = async () => { 
   if (analysisData.value.count === 0) {
     aiReport.value =
       "暂无数据。请先去首页添加一些碳排记录,AI 才能为您进行分析哦。";

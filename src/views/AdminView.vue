@@ -20,20 +20,17 @@ import {
 const store = useUserStore();
 const router = useRouter();
 
-// UI 状态：用于切换左侧主菜单
-const activeMenu = ref('mall'); // 默认展示新加的商城模块方便你查看
+const activeMenu = ref('mall'); 
 
-// ---------------- 1. 原有状态 ----------------
 const communityPosts = ref([
   { id: 2001, author: "绿叶使者", content: "今天骑共享单车通勤，顺便用积分兑换了环保袋，减排打卡！", time: "2026-06-10 09:30", status: "pending" },
   { id: 2002, author: "TestUser", content: "这个系统有刷分外挂吗？想刷点积分换东西。", time: "2026-06-10 10:15", status: "pending" },
   { id: 2003, author: "环保小卫士", content: "分享一个旧衣物改造的教程，大家一起变废为宝~", time: "2026-06-09 14:20", status: "approved" }
 ]);
 
-// ---------------- 2. 新增：商城与订单状态 ----------------
-const mallActiveTab = ref('products'); // 商城模块的子标签页
 
-// 模拟的商城商品库数据
+const mallActiveTab = ref('products'); 
+
 const mallProducts = ref([
   { id: 1, name: "环保帆布袋", cost: 500, stock: 150, status: "online", color: "#10b981" },
   { id: 2, name: "共享单车周卡", cost: 1200, stock: 50, status: "online", color: "#3b82f6" },
@@ -41,17 +38,14 @@ const mallProducts = ref([
   { id: 4, name: "瑞幸自带杯券", cost: 300, stock: 200, status: "online", color: "#6366f1" }
 ]);
 
-// 模拟的异常兑换订单数据
 const exceptionOrders = ref([
   { orderId: "ERR-9901", user: "李同学", product: "共享单车周卡", cost: 1200, time: "2026-06-10 08:12", issue: "网络超时，积分已扣但未生成核销码", status: "unhandled" },
   { orderId: "ERR-9902", user: "张三", product: "环保帆布袋", cost: 500, time: "2026-06-09 18:45", issue: "库存并发不足导致超卖", status: "unhandled" }
 ]);
 
-// 编辑商品的弹窗状态
 const showProductDialog = ref(false);
 const editingProduct = reactive({ id: null, name: "", cost: 0, stock: 0 });
 
-// ---------------- 交互逻辑 ----------------
 
 const handleLogout = () => {
   store.logout();
@@ -73,7 +67,6 @@ const handleToggleStatus = (user) => {
   ElMessage.success(`用户状态已更新`);
 };
 
-// 社区审核交互
 const handleApprovePost = (row) => {
   row.status = 'approved';
   ElMessage.success("动态审核已通过，将展示在社区前端");
@@ -87,13 +80,11 @@ const handleDeletePost = (row) => {
   });
 };
 
-// 商城交互：上下架商品
 const handleToggleProduct = (row) => {
   row.status = row.status === 'online' ? 'offline' : 'online';
   ElMessage.success(`商品 ${row.name} 已${row.status === 'online' ? '上架' : '下架'}`);
 };
 
-// 商城交互：打开编辑弹窗
 const openEditDialog = (row) => {
   editingProduct.id = row.id;
   editingProduct.name = row.name;
@@ -102,7 +93,6 @@ const openEditDialog = (row) => {
   showProductDialog.value = true;
 };
 
-// 商城交互：保存编辑
 const saveProductEdit = () => {
   const target = mallProducts.value.find(p => p.id === editingProduct.id);
   if (target) {
@@ -114,7 +104,6 @@ const saveProductEdit = () => {
   showProductDialog.value = false;
 };
 
-// 异常订单交互：退还积分
 const handleRefund = (row) => {
   ElMessageBox.confirm(`确定要为用户 ${row.user} 退还 ${row.cost} 积分吗？`, "退还积分", {
     confirmButtonText: "确认退还", cancelButtonText: "取消", type: "warning"
@@ -124,7 +113,6 @@ const handleRefund = (row) => {
   });
 };
 
-// 异常订单交互：强制补发
 const handleForceComplete = (row) => {
   row.status = 'completed';
   ElMessage.success(`已强制补发核销码至 ${row.user} 的账户`);
@@ -412,7 +400,6 @@ const handleForceComplete = (row) => {
 .control-info .label { display: block; font-weight: 600; color: #333; }
 .control-info .desc { margin: 0; color: #666; font-size: 13px; }
 
-/* 页面切换动画 */
 .fade-in {
   animation: fadeIn 0.4s ease-in-out;
 }
