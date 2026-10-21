@@ -80,14 +80,14 @@ export const useCarbonStore = defineStore('carbon', () => {
     currentUserKey.value = ''
   }
 
-  function addRecord(val, type) {
-    let co2 = 0
-    if (type === 'traffic') co2 = val * 0.2
-    if (type === 'food') co2 = val * 0.1
-    if (type === 'energy') co2 = val * 0.5
-    
-    co2 = parseFloat(co2.toFixed(2))
+  function computeImpact(val, factor) {
+    const co2 = parseFloat((Number(val) * Number(factor)).toFixed(2))
     const earnedPoints = Math.floor(co2 * 10)
+    return { co2, earnedPoints }
+  }
+
+  function addRecord(val, type, factor) {
+    const { co2, earnedPoints } = computeImpact(val, factor)
 
     records.value.push({
       id: Date.now(),
@@ -126,6 +126,6 @@ export const useCarbonStore = defineStore('carbon', () => {
   return { 
     records, badges, points, 
     totalCo2Saved, userLevel, last7DaysData,
-    loadUserData, addRecord, redeem, clearSession
+    loadUserData, computeImpact, addRecord, redeem, clearSession
   }
 })

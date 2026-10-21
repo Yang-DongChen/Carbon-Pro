@@ -97,11 +97,12 @@ const selectScenario = (item) => {
 };
 
 const previewResult = computed(() => {
-  if (!activeScenario.value) return { co2: 0, points: 0 };
-  const val = sliderValue.value;
-  const co2 = (val * activeScenario.value.factor).toFixed(2);
-  const points = Math.floor(co2 * 10);
-  return { co2, points };
+  if (!activeScenario.value) return { co2: "0.00", points: 0 };
+  const { co2, earnedPoints } = store.computeImpact(
+    sliderValue.value,
+    activeScenario.value.factor
+  );
+  return { co2: co2.toFixed(2), points: earnedPoints };
 });
 
 const handleClose = () => {
@@ -112,9 +113,13 @@ const handleClose = () => {
 };
 
 const handleSave = () => {
-  store.addRecord(sliderValue.value, activeScenario.value.type);
+  const { co2, earnedPoints } = store.addRecord(
+    sliderValue.value,
+    activeScenario.value.type,
+    activeScenario.value.factor
+  );
   ElMessage({
-    message: `记录成功！减排 ${previewResult.value.co2} kg，积分 +${previewResult.value.points}`,
+    message: `记录成功！减排 ${co2.toFixed(2)} kg，积分 +${earnedPoints}`,
     type: "success",
     duration: 3000,
     offset: 60, // 手机端提示稍微靠下一点
